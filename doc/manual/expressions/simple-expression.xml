@@ -40,6 +40,7 @@ need to do three things:
 
 <xi:include href="expression-syntax.xml" />
 <xi:include href="build-script.xml" />
+<xi:include href="build-locally.xml" />
 <xi:include href="arguments-variables.xml" />
 <xi:include href="simple-building-testing.xml" />
 <xi:include href="generic-builder.xml" />

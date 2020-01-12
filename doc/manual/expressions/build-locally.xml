@@ -1,0 +1,84 @@
+<section xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      version="5.0"
+      xml:id='sec-building-simple'>
+
+<title>Building in a test directory</title>
+
+<para>To test our package, you can now build Hello in a directory separate from nixpkgs.  Set up
+an empty directory, and put the default.nix and builder.sh files in it.  We'll do the build
+with with the command <command linkend="sec-nix-build">nix-build</command>.  When passed a
+directory name, nix-build will look for a default.nix in that directory, and try to build it.
+Calling nix-build without any arguments will attempt to build the default.nix in the current directory.
+
+Unfortunately that's not all we need.  In general, default.nix files are in 'derivation' or
+'callPackage derivation' formats.  For packages in nixpkgs, callPackage format must be used,
+and these don't build on their own.  But we can get nix-build to use callPackage on our
+local default.nix like so:
+
+nix-build -E 'with import <nixpkgs> { }; callPackage ./default.nix { }'
+
+This builds the Nix expression and creates a symlink named <filename>result</filename> in the current directory:
+
+<screen>
+$ ls
+builder.sh  default.nix
+$ nix-build -E 'with import <nixpkgs> { }; callPackage ./default.nix { }'
+/nix/store/fkr5ab4lc1k0cn98lp13615pvc8r1nyh-hello-2.1.1
+$ ls -l 
+-rw-r--r-- ... Dec 10 12:33 builder.sh
+-rw-r--r-- ... Dec 10 12:34 default.nix
+lrwxrwxrwx ... Dec 10 18:31 result -> /nix/store/fkr5ab4lc1k0cn98lp13615pvc8r1nyh-hello-2.1.1
+$ ./result/bin/hello
+Hello, world!
+</screen>
+
+<para><command>nix-build</command> registers the
+<filename>./result</filename> symlink as a garbage collection root, so
+unless and until you delete the <filename>./result</filename> symlink,
+the output of the build will be safely kept on your system.  You can
+use <command>nix-build</command>’s <option
+linkend='opt-out-link'>-o</option> switch to give the symlink another
+name.</para>
+
+<para>Nix has transactional semantics.  Once a build finishes
+successfully, Nix makes a note of this in its database: it registers
+that the path denoted by <envar>out</envar> is now
+<quote>valid</quote>.  If you try to build the derivation again, Nix
+will see that the path is already valid and finish immediately.  If a
+build fails, either because it returns a non-zero exit code, because
+Nix or the builder are killed, or because the machine crashes, then
+the output paths will not be registered as valid.  If you try to build
+the derivation again, Nix will remove the output paths if they exist
+(e.g., because the builder died half-way through <literal>make
+install</literal>) and try again.  Note that there is no
+<quote>negative caching</quote>: Nix doesn't remember that a build
+failed, and so a failed build can always be repeated.  This is because
+Nix cannot distinguish between permanent failures (e.g., a compiler
+error due to a syntax error in the source) and transient failures
+(e.g., a disk full condition).</para>
+
+<para>Nix also performs locking.  If you run multiple Nix builds
+simultaneously, and they try to build the same derivation, the first
+Nix instance that gets there will perform the build, while the others
+block (or perform other derivations if available) until the build
+finishes:
+
+<screen>
+$ nix-build -A hello
+waiting for lock on `/nix/store/0h5b7hp8d4hqfrw8igvx97x1xawrjnac-hello-2.1.1x'
+</screen>
+
+So it is always safe to run multiple instances of Nix in parallel
+(which isn’t the case with, say, <command>make</command>).</para>
+
+<para>If you have a system with multiple CPUs, you may want to have
+Nix build different derivations in parallel (insofar as possible).
+Just pass the option <link linkend='opt-max-jobs'><option>-j
+<replaceable>N</replaceable></option></link>, where
+<replaceable>N</replaceable> is the maximum number of jobs to be run
+in parallel, or set.  Typically this should be the number of
+CPUs.</para>
+
+</section>
