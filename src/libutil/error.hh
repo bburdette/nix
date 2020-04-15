@@ -20,24 +20,9 @@ typedef enum {
 class ErrPos
 {
 public:
-    int lineNumber;
-    int column;
-    string nixFile;
-
-    template <class P>
-    ErrPos& operator=(const P &pos)
-    {
-        lineNumber = pos.line;
-        column = pos.column;
-        nixFile = pos.file;
-        return *this;
-    }
-
-    template <class P>
-    ErrPos(const P &p)
-    {
-      *this = p;
-    }
+    virtual int getLine() const { return 0; }
+    virtual int getColumn() const { return 0; }
+    virtual string getFile() const { return string(""); }
 };
 
 class NixCode

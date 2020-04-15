@@ -21,8 +21,9 @@ MakeError(RestrictedPathError, Error);
 
 /* Position objects. */
 
-struct Pos
+class Pos : public ErrPos
 {
+public:
     Symbol file;
     unsigned int line, column;
     Pos() : line(0), column(0) { };
@@ -43,6 +44,10 @@ struct Pos
         if (line > p2.line) return false;
         return column < p2.column;
     }
+
+    virtual int getLine() const { return line; }
+    virtual int getColumn() const { return column; }
+    virtual string getFile() const { return file; }
 };
 
 extern Pos noPos;
