@@ -45,9 +45,9 @@ public:
         return column < p2.column;
     }
 
-    virtual int getLine() const { return line; }
-    virtual int getColumn() const { return column; }
-    virtual string getFile() const { return file; }
+    int getLine() const override { return line; }
+    int getColumn() const override { return column; }
+    string getFile() const override { return file; }
 };
 
 extern Pos noPos;
