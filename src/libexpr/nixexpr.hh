@@ -21,9 +21,8 @@ MakeError(RestrictedPathError, Error);
 
 /* Position objects. */
 
-class Pos : public ErrPos
+struct Pos : public PosInterface 
 {
-public:
     Symbol file;
     unsigned int line, column;
     Pos() : line(0), column(0) { };

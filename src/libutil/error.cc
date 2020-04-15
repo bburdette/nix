@@ -15,10 +15,10 @@ std::ostream& operator<<(std::ostream &os, const hintformat &hf)
 
 string showErrPos(const ErrPos &errPos)
 {
-    if (errPos.getColumn() > 0) {
-        return fmt("(%1%:%2%)", errPos.getLine(), errPos.getColumn());
+    if (errPos.column > 0) {
+        return fmt("(%1%:%2%)", errPos.line, errPos.column);
     } else {
-        return fmt("(%1%)", errPos.getLine());
+        return fmt("(%1%)", errPos.line);
     };
 }
 
@@ -28,7 +28,7 @@ void printCodeLines(const string &prefix, const NixCode &nixCode)
     if (nixCode.prevLineOfCode.has_value()) {
         std::cout << fmt("%1% %|2$5d|| %3%",
                          prefix,
-                         (nixCode.errPos.getLine() - 1),
+                         (nixCode.errPos.line - 1),
                          *nixCode.prevLineOfCode)
                   << std::endl;
     }
@@ -36,13 +36,13 @@ void printCodeLines(const string &prefix, const NixCode &nixCode)
     // line of code containing the error.%2$+5d%
     std::cout << fmt("%1% %|2$5d|| %3%",
                      prefix,
-                     (nixCode.errPos.getLine()),
+                     (nixCode.errPos.line),
                      nixCode.errLineOfCode)
               << std::endl;
 
     // error arrows for the column range.
-    if (nixCode.errPos.getColumn() > 0) {
-        int start = nixCode.errPos.getColumn();
+    if (nixCode.errPos.column > 0) {
+        int start = nixCode.errPos.column;
         std::string spaces;
         for (int i = 0; i < start; ++i) {
             spaces.append(" ");
@@ -60,7 +60,7 @@ void printCodeLines(const string &prefix, const NixCode &nixCode)
     if (nixCode.nextLineOfCode.has_value()) {
         std::cout << fmt("%1% %|2$5d|| %3%",
                          prefix,
-                         (nixCode.errPos.getLine() + 1),
+                         (nixCode.errPos.line + 1),
                          *nixCode.nextLineOfCode)
                   << std::endl;
     }
@@ -110,14 +110,14 @@ void printErrorInfo(const ErrorInfo &einfo)
 
     // filename.
     if (einfo.nixCode.has_value()) {
-        if (einfo.nixCode->errPos.getFile() != "") {
+        if (einfo.nixCode->errPos.file != "") {
             string eline = einfo.nixCode->errLineOfCode != ""
                            ? string(" ") + showErrPos(einfo.nixCode->errPos)
                            : "";
 
             std::cout << fmt("%1%in file: " ANSI_BLUE "%2%%3%" ANSI_NORMAL,
                              prefix, 
-                             einfo.nixCode->errPos.getFile(),
+                             einfo.nixCode->errPos.file,
                              eline) << std::endl;
             std::cout << prefix << std::endl;
         } else {

@@ -17,12 +17,29 @@ typedef enum {
     elError
 } ErrLevel;
 
+struct PosInterface
+{
+    virtual int getLine() const = 0;
+    virtual int getColumn() const = 0;
+    virtual string getFile() const = 0;
+};
+
 class ErrPos
 {
 public:
-    virtual int getLine() const { return 0; }
-    virtual int getColumn() const { return 0; }
-    virtual string getFile() const { return string(""); }
+   int line;
+   int column;
+   string file;
+
+   ErrPos& operator=(const PosInterface &pos) {
+     line = pos.getLine();
+     column = pos.getColumn();
+     file = pos.getFile();
+     return *this;
+   }
+   ErrPos(const PosInterface &pos) {
+     *this = pos; 
+   }
 };
 
 class NixCode
