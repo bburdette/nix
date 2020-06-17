@@ -493,7 +493,7 @@ static void installDerivations(Globals & globals,
         if (globals.dryRun) return;
 
         if (createUserEnv(*globals.state, allElems,
-                profile, settings.envKeepDerivations, lockToken)) break;
+            profile, settings.envKeepDerivations, lockToken)) break;
     }
 }
 
@@ -502,7 +502,7 @@ static void opInstall(Globals & globals, Strings opFlags, Strings opArgs)
 {
     for (Strings::iterator i = opFlags.begin(); i != opFlags.end(); ) {
         string arg = *i++;
-        if (parseInstallSourceOptions(globals, i, opFlags, arg)) ;
+        if (parseInstallSourceOptions(globals, i, opFlags, arg));
         else if (arg == "--preserve-installed" || arg == "-P")
             globals.preserveInstalled = true;
         else if (arg == "--remove-all" || arg == "-r")
@@ -603,7 +603,7 @@ static void upgradeDerivations(Globals & globals,
         if (globals.dryRun) return;
 
         if (createUserEnv(*globals.state, newElems,
-                globals.profile, settings.envKeepDerivations, lockToken)) break;
+            globals.profile, settings.envKeepDerivations, lockToken)) break;
     }
 }
 
@@ -613,7 +613,7 @@ static void opUpgrade(Globals & globals, Strings opFlags, Strings opArgs)
     UpgradeType upgradeType = utLt;
     for (Strings::iterator i = opFlags.begin(); i != opFlags.end(); ) {
         string arg = *i++;
-        if (parseInstallSourceOptions(globals, i, opFlags, arg)) ;
+        if (parseInstallSourceOptions(globals, i, opFlags, arg));
         else if (arg == "--lt") upgradeType = utLt;
         else if (arg == "--leq") upgradeType = utLeq;
         else if (arg == "--eq") upgradeType = utEq;
@@ -667,7 +667,7 @@ static void opSetFlag(Globals & globals, Strings opFlags, Strings opArgs)
 
         /* Write the new user environment. */
         if (createUserEnv(*globals.state, installedElems,
-                globals.profile, settings.envKeepDerivations, lockToken)) break;
+            globals.profile, settings.envKeepDerivations, lockToken)) break;
     }
 }
 
@@ -679,7 +679,7 @@ static void opSet(Globals & globals, Strings opFlags, Strings opArgs)
 
     for (Strings::iterator i = opFlags.begin(); i != opFlags.end(); ) {
         string arg = *i++;
-        if (parseInstallSourceOptions(globals, i, opFlags, arg)) ;
+        if (parseInstallSourceOptions(globals, i, opFlags, arg));
         else throw UsageError("unknown flag '%1%'", arg);
     }
 
@@ -727,18 +727,18 @@ static void uninstallDerivations(Globals & globals, Strings & selectors,
                 split = std::partition(
                     workingElems.begin(), workingElems.end(),
                     [&selectorStorePath, globals](auto &elem) {
-                        return selectorStorePath != globals.state->store->parseStorePath(elem.queryOutPath());
-                    }
-                );
+                    return selectorStorePath != globals.state->store->parseStorePath(elem.queryOutPath());
+                }
+                    );
             } else {
                 DrvName selectorName(selector);
                 split = std::partition(
                     workingElems.begin(), workingElems.end(),
                     [&selectorName](auto &elem){
-                        DrvName elemName(elem.queryName());
-                        return !selectorName.matches(elemName);
-                    }
-                );
+                    DrvName elemName(elem.queryName());
+                    return !selectorName.matches(elemName);
+                }
+                    );
             }
             if (split == workingElems.end())
                 warn("selector '%s' matched no installed derivations", selector);
@@ -751,7 +751,7 @@ static void uninstallDerivations(Globals & globals, Strings & selectors,
         if (globals.dryRun) return;
 
         if (createUserEnv(*globals.state, workingElems,
-                profile, settings.envKeepDerivations, lockToken)) break;
+            profile, settings.envKeepDerivations, lockToken)) break;
     }
 }
 
@@ -1159,19 +1159,19 @@ static void opQuery(Globals & globals, Strings opFlags, Strings opArgs)
                                         attrs3["value"] = v->listElems()[j]->string.s;
                                         xml.writeEmptyElement("string", attrs3);
                                     }
-                              } else if (v->type == tAttrs) {
-                                  attrs2["type"] = "strings";
-                                  XMLOpenElement m(xml, "meta", attrs2);
-                                  Bindings & attrs = *v->attrs;
-                                  for (auto &i : attrs) {
-                                      Attr & a(*attrs.find(i.name));
-                                      if(a.value->type != tString) continue;
-                                      XMLAttrs attrs3;
-                                      attrs3["type"] = i.name;
-                                      attrs3["value"] = a.value->string.s;
-                                      xml.writeEmptyElement("string", attrs3);
+                                } else if (v->type == tAttrs) {
+                                    attrs2["type"] = "strings";
+                                    XMLOpenElement m(xml, "meta", attrs2);
+                                    Bindings & attrs = *v->attrs;
+                                    for (auto &i : attrs) {
+                                        Attr & a(*attrs.find(i.name));
+                                        if(a.value->type != tString) continue;
+                                        XMLAttrs attrs3;
+                                        attrs3["type"] = i.name;
+                                        attrs3["value"] = a.value->string.s;
+                                        xml.writeEmptyElement("string", attrs3);
+                                    }
                                 }
-                              }
                             }
                         }
                     }

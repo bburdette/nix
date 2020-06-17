@@ -118,7 +118,7 @@ DrvInfo::Outputs DrvInfo::queryOutputs(bool onlyOutputsToInstall)
     const Value * outTI = queryMeta("outputsToInstall");
     if (!outTI) return outputs;
     const auto errMsg = Error("this derivation has bad 'meta.outputsToInstall'");
-        /* ^ this shows during `nix-env -i` right under the bad derivation */
+    /* ^ this shows during `nix-env -i` right under the bad derivation */
     if (!outTI->isList()) throw errMsg;
     Outputs result;
     for (auto i = outTI->listElems(); i != outTI->listElems() + outTI->listSize(); ++i) {
@@ -179,7 +179,7 @@ bool DrvInfo::checkMeta(Value & v)
         return true;
     }
     else return v.type == tInt || v.type == tBool || v.type == tString ||
-                v.type == tFloat;
+               v.type == tFloat;
 }
 
 
@@ -323,7 +323,7 @@ static void getDerivations(EvalState & state, Value & vIn,
     state.autoCallFunction(autoArgs, vIn, v);
 
     /* Process the expression. */
-    if (!getDerivation(state, v, pathPrefix, drvs, done, ignoreAssertionFailures)) ;
+    if (!getDerivation(state, v, pathPrefix, drvs, done, ignoreAssertionFailures));
 
     else if (v.type == tAttrs) {
 

@@ -57,15 +57,15 @@ void printMissing(ref<Store> store, const StorePathSet & willBuild,
 
     if (!willSubstitute.empty()) {
         printMsg(lvl, fmt("these paths will be fetched (%.2f MiB download, %.2f MiB unpacked):",
-                downloadSize / (1024.0 * 1024.0),
-                narSize / (1024.0 * 1024.0)));
+            downloadSize / (1024.0 * 1024.0),
+            narSize / (1024.0 * 1024.0)));
         for (auto & i : willSubstitute)
             printMsg(lvl, fmt("  %s", store->printStorePath(i)));
     }
 
     if (!unknown.empty()) {
         printMsg(lvl, fmt("don't know how to build these paths%s:",
-                (settings.readOnlyMode ? " (may be caused by read-only store access)" : "")));
+            (settings.readOnlyMode ? " (may be caused by read-only store access)" : "")));
         for (auto & i : unknown)
             printMsg(lvl, fmt("  %s", store->printStorePath(i)));
     }
@@ -167,38 +167,38 @@ LegacyArgs::LegacyArgs(const std::string & programName,
     : MixCommonArgs(programName), parseArg(parseArg)
 {
     addFlag({
-        .longName = "no-build-output",
-        .shortName = 'Q',
-        .description = "do not show build output",
-        .handler = {[&]() {setLogFormat(LogFormat::raw); }},
-    });
+            .longName = "no-build-output",
+            .shortName = 'Q',
+            .description = "do not show build output",
+            .handler = {[&]() {setLogFormat(LogFormat::raw); }},
+        });
 
     addFlag({
-        .longName = "keep-failed",
-        .shortName ='K',
-        .description = "keep temporary directories of failed builds",
-        .handler = {&(bool&) settings.keepFailed, true},
-    });
+            .longName = "keep-failed",
+            .shortName ='K',
+            .description = "keep temporary directories of failed builds",
+            .handler = {&(bool&) settings.keepFailed, true},
+        });
 
     addFlag({
-        .longName = "keep-going",
-        .shortName ='k',
-        .description = "keep going after a build fails",
-        .handler = {&(bool&) settings.keepGoing, true},
-    });
+            .longName = "keep-going",
+            .shortName ='k',
+            .description = "keep going after a build fails",
+            .handler = {&(bool&) settings.keepGoing, true},
+        });
 
     addFlag({
-        .longName = "fallback",
-        .description = "build from source if substitution fails",
-        .handler = {&(bool&) settings.tryFallback, true},
-    });
+            .longName = "fallback",
+            .description = "build from source if substitution fails",
+            .handler = {&(bool&) settings.tryFallback, true},
+        });
 
     auto intSettingAlias = [&](char shortName, const std::string & longName,
-        const std::string & description, const std::string & dest) {
-        mkFlag<unsigned int>(shortName, longName, description, [=](unsigned int n) {
-            settings.set(dest, std::to_string(n));
-        });
-    };
+                               const std::string & description, const std::string & dest) {
+            mkFlag<unsigned int>(shortName, longName, description, [=](unsigned int n) {
+                settings.set(dest, std::to_string(n));
+            });
+        };
 
     intSettingAlias(0, "cores", "maximum number of CPU cores to use inside a build", "cores");
     intSettingAlias(0, "max-silent-time", "number of seconds of silence before a build is killed", "max-silent-time");
@@ -211,11 +211,11 @@ LegacyArgs::LegacyArgs(const std::string & programName,
         &gcWarning, false);
 
     addFlag({
-        .longName = "store",
-        .description = "URI of the Nix store to use",
-        .labels = {"store-uri"},
-        .handler = {&(std::string&) settings.storeUri},
-    });
+            .longName = "store",
+            .description = "URI of the Nix store to use",
+            .labels = {"store-uri"},
+            .handler = {&(std::string&) settings.storeUri},
+        });
 }
 
 
@@ -269,7 +269,7 @@ void printVersion(const string & programName)
         std::cout << "System configuration file: " << settings.nixConfDir + "/nix.conf" << "\n";
         std::cout << "User configuration files: " <<
             concatStringsSep(":", settings.nixUserConfFiles)
-            << "\n";
+                  << "\n";
         std::cout << "Store directory: " << settings.nixStore << "\n";
         std::cout << "State directory: " << settings.nixStateDir << "\n";
     }
@@ -340,18 +340,18 @@ RunPager::RunPager()
     toPager.create();
 
     pid = startProcess([&]() {
-        if (dup2(toPager.readSide.get(), STDIN_FILENO) == -1)
-            throw SysError("dupping stdin");
-        if (!getenv("LESS"))
-            setenv("LESS", "FRSXMK", 1);
-        restoreSignals();
-        if (pager)
-            execl("/bin/sh", "sh", "-c", pager, nullptr);
-        execlp("pager", "pager", nullptr);
-        execlp("less", "less", nullptr);
-        execlp("more", "more", nullptr);
-        throw SysError("executing '%1%'", pager);
-    });
+            if (dup2(toPager.readSide.get(), STDIN_FILENO) == -1)
+                throw SysError("dupping stdin");
+            if (!getenv("LESS"))
+                setenv("LESS", "FRSXMK", 1);
+            restoreSignals();
+            if (pager)
+                execl("/bin/sh", "sh", "-c", pager, nullptr);
+            execlp("pager", "pager", nullptr);
+            execlp("less", "less", nullptr);
+            execlp("more", "more", nullptr);
+            throw SysError("executing '%1%'", pager);
+        });
 
     pid.setKillSignal(SIGINT);
 

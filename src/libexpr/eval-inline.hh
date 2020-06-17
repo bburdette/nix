@@ -10,9 +10,9 @@ namespace nix {
 LocalNoInlineNoReturn(void throwEvalError(const Pos & pos, const char * s))
 {
     throw EvalError({
-        .hint = hintfmt(s),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInlineNoReturn(void throwTypeError(const char * s, const Value & v))
@@ -24,9 +24,9 @@ LocalNoInlineNoReturn(void throwTypeError(const char * s, const Value & v))
 LocalNoInlineNoReturn(void throwTypeError(const Pos & pos, const char * s, const Value & v))
 {
     throw TypeError({
-        .hint = hintfmt(s, showType(v)),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s, showType(v)),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 

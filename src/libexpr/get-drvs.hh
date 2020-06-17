@@ -56,9 +56,9 @@ public:
     void setMeta(const string & name, Value * v);
 
     /*
-    MetaInfo queryMetaInfo(EvalState & state) const;
-    MetaValue queryMetaInfo(EvalState & state, const string & name) const;
-    */
+       MetaInfo queryMetaInfo(EvalState & state) const;
+       MetaValue queryMetaInfo(EvalState & state, const string & name) const;
+     */
 
     void setName(const string & s) { name = s; }
     void setDrvPath(const string & s) { drvPath = s; }

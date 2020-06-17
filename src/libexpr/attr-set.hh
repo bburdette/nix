@@ -77,9 +77,9 @@ public:
         auto a = get(name);
         if (!a)
             throw Error({
-                .hint = hintfmt("attribute '%s' missing", name),
-                .nixCode = NixCode { .errPos = pos }
-            });
+                    .hint = hintfmt("attribute '%s' missing", name),
+                    .nixCode = NixCode { .errPos = pos }
+                });
 
         return *a;
     }
@@ -104,8 +104,8 @@ public:
         for (size_t n = 0; n < size_; n++)
             res.emplace_back(&attrs[n]);
         std::sort(res.begin(), res.end(), [](const Attr * a, const Attr * b) {
-            return (const string &) a->name < (const string &) b->name;
-        });
+                return (const string &) a->name < (const string &) b->name;
+            });
         return res;
     }
 

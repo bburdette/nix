@@ -21,18 +21,18 @@ LogFormat parseLogFormat(const std::string & logFormatStr) {
 
 Logger * makeDefaultLogger() {
     switch (defaultLogFormat) {
-    case LogFormat::raw:
-        return makeSimpleLogger(false);
-    case LogFormat::rawWithLogs:
-        return makeSimpleLogger(true);
-    case LogFormat::internalJson:
-        return makeJSONLogger(*makeSimpleLogger());
-    case LogFormat::bar:
-        return makeProgressBar();
-    case LogFormat::barWithLogs:
-        return makeProgressBar(true);
-    default:
-        abort();
+        case LogFormat::raw:
+            return makeSimpleLogger(false);
+        case LogFormat::rawWithLogs:
+            return makeSimpleLogger(true);
+        case LogFormat::internalJson:
+            return makeJSONLogger(*makeSimpleLogger());
+        case LogFormat::bar:
+            return makeProgressBar();
+        case LogFormat::barWithLogs:
+            return makeProgressBar(true);
+        default:
+            abort();
     }
 }
 

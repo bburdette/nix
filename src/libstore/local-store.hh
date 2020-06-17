@@ -99,8 +99,8 @@ public:
 private:
 
     Setting<bool> requireSigs{(Store*) this,
-        settings.requireSigs,
-        "require-sigs", "whether store paths should have a trusted signature on import"};
+                              settings.requireSigs,
+                              "require-sigs", "whether store paths should have a trusted signature on import"};
 
     const PublicKeys & getPublicKeys();
 

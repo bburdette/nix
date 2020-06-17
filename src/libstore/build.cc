@@ -659,32 +659,32 @@ HookInstance::HookInstance()
     /* Fork the hook. */
     pid = startProcess([&]() {
 
-        commonChildInit(fromHook);
+            commonChildInit(fromHook);
 
-        if (chdir("/") == -1) throw SysError("changing into /");
+            if (chdir("/") == -1) throw SysError("changing into /");
 
-        /* Dup the communication pipes. */
-        if (dup2(toHook.readSide.get(), STDIN_FILENO) == -1)
-            throw SysError("dupping to-hook read side");
+            /* Dup the communication pipes. */
+            if (dup2(toHook.readSide.get(), STDIN_FILENO) == -1)
+                throw SysError("dupping to-hook read side");
 
-        /* Use fd 4 for the builder's stdout/stderr. */
-        if (dup2(builderOut.writeSide.get(), 4) == -1)
-            throw SysError("dupping builder's stdout/stderr");
+            /* Use fd 4 for the builder's stdout/stderr. */
+            if (dup2(builderOut.writeSide.get(), 4) == -1)
+                throw SysError("dupping builder's stdout/stderr");
 
-        /* Hack: pass the read side of that fd to allow build-remote
-           to read SSH error messages. */
-        if (dup2(builderOut.readSide.get(), 5) == -1)
-            throw SysError("dupping builder's stdout/stderr");
+            /* Hack: pass the read side of that fd to allow build-remote
+               to read SSH error messages. */
+            if (dup2(builderOut.readSide.get(), 5) == -1)
+                throw SysError("dupping builder's stdout/stderr");
 
-        Strings args = {
-            std::string(baseNameOf(settings.buildHook.get())),
-            std::to_string(verbosity),
-        };
+            Strings args = {
+                std::string(baseNameOf(settings.buildHook.get())),
+                std::to_string(verbosity),
+            };
 
-        execv(settings.buildHook.get().c_str(), stringsToCharPtrs(args).data());
+            execv(settings.buildHook.get().c_str(), stringsToCharPtrs(args).data());
 
-        throw SysError("executing '%s'", settings.buildHook);
-    });
+            throw SysError("executing '%s'", settings.buildHook);
+        });
 
     pid.setSeparatePG(true);
     fromHook.writeSide = -1;
@@ -1308,11 +1308,11 @@ void DerivationGoal::repairClosure()
     for (auto & i : outputClosure) {
         if (worker.pathContentsGood(i)) continue;
         logError({
-            .name = "Corrupt path in closure",
-            .hint = hintfmt(
-                "found corrupted or missing path '%s' in the output closure of '%s'",
-                worker.store.printStorePath(i), worker.store.printStorePath(drvPath))
-        });
+                .name = "Corrupt path in closure",
+                .hint = hintfmt(
+                    "found corrupted or missing path '%s' in the output closure of '%s'",
+                    worker.store.printStorePath(i), worker.store.printStorePath(drvPath))
+            });
         auto drvPath2 = outputsToDrv.find(i);
         if (drvPath2 == outputsToDrv.end())
             addWaitee(worker.makeSubstitutionGoal(i, Repair));
@@ -1347,8 +1347,8 @@ void DerivationGoal::inputsRealised()
         if (!useDerivation)
             throw Error("some dependencies of '%s' are missing", worker.store.printStorePath(drvPath));
         done(BuildResult::DependencyFailed, Error(
-                "%s dependencies of derivation '%s' failed to build",
-                nrFailed, worker.store.printStorePath(drvPath)));
+            "%s dependencies of derivation '%s' failed to build",
+            nrFailed, worker.store.printStorePath(drvPath)));
         return;
     }
 
@@ -1841,11 +1841,11 @@ HookReply DerivationGoal::tryBuildHook()
     } catch (SysError & e) {
         if (e.errNo == EPIPE) {
             logError({
-                .name = "Build hook died",
-                .hint = hintfmt(
-                    "build hook died unexpectedly: %s",
-                    chomp(drainFD(worker.hook->fromHook.readSide.get())))
-            });
+                    .name = "Build hook died",
+                    .hint = hintfmt(
+                        "build hook died unexpectedly: %s",
+                        chomp(drainFD(worker.hook->fromHook.readSide.get())))
+                });
             worker.hook = 0;
             return rpDecline;
         } else
@@ -1929,12 +1929,12 @@ static void preloadNSS() {
        been loaded in the parent. So we force a lookup of an invalid domain to force the NSS machinery to
        load its lookup libraries in the parent before any child gets a chance to. */
     std::call_once(dns_resolve_flag, []() {
-        struct addrinfo *res = NULL;
+            struct addrinfo *res = NULL;
 
-        if (getaddrinfo("this.pre-initializes.the.dns.resolvers.invalid.", "http", NULL, &res) != 0) {
-            if (res) freeaddrinfo(res);
-        }
-    });
+            if (getaddrinfo("this.pre-initializes.the.dns.resolvers.invalid.", "http", NULL, &res) != 0) {
+                if (res) freeaddrinfo(res);
+            }
+        });
 }
 
 
@@ -1992,9 +1992,9 @@ void DerivationGoal::startBuilder()
 
     if (worker.store.storeDir != worker.store.realStoreDir) {
         #if __linux__
-            useChroot = true;
+        useChroot = true;
         #else
-            throw Error("building using a diverted store is not supported on this platform");
+        throw Error("building using a diverted store is not supported on this platform");
         #endif
     }
 
@@ -2139,10 +2139,10 @@ void DerivationGoal::startBuilder()
         createDirs(chrootRootDir + "/etc");
 
         writeFile(chrootRootDir + "/etc/passwd", fmt(
-                "root:x:0:0:Nix build user:%3%:/noshell\n"
-                "nixbld:x:%1%:%2%:Nix build user:%3%:/noshell\n"
-                "nobody:x:65534:65534:Nobody:/:/noshell\n",
-                sandboxUid, sandboxGid, settings.sandboxBuildDir));
+            "root:x:0:0:Nix build user:%3%:/noshell\n"
+            "nixbld:x:%1%:%2%:Nix build user:%3%:/noshell\n"
+            "nobody:x:65534:65534:Nobody:/:/noshell\n",
+            sandboxUid, sandboxGid, settings.sandboxBuildDir));
 
         /* Declare the build user's group so that programs get a consistent
            view of the system (e.g., "id -gn"). */
@@ -2239,7 +2239,7 @@ void DerivationGoal::startBuilder()
         auto lines = runProgram(settings.preBuildHook, false, args);
         auto lastPos = std::string::size_type{0};
         for (auto nlPos = lines.find('\n'); nlPos != string::npos;
-                nlPos = lines.find('\n', lastPos)) {
+             nlPos = lines.find('\n', lastPos)) {
             auto line = std::string{lines, lastPos, nlPos - lastPos};
             lastPos = nlPos + 1;
             if (state == stBegin) {
@@ -2359,7 +2359,7 @@ void DerivationGoal::startBuilder()
            at-fork handlers not being run. Note that we use
            CLONE_PARENT to ensure that the real builder is parented to
            us.
-        */
+         */
 
         if (!fixedOutput)
             privateNetwork = true;
@@ -2370,51 +2370,51 @@ void DerivationGoal::startBuilder()
 
         Pid helper = startProcess([&]() {
 
-            /* Drop additional groups here because we can't do it
-               after we've created the new user namespace.  FIXME:
-               this means that if we're not root in the parent
-               namespace, we can't drop additional groups; they will
-               be mapped to nogroup in the child namespace. There does
-               not seem to be a workaround for this. (But who can tell
-               from reading user_namespaces(7)?)
-               See also https://lwn.net/Articles/621612/. */
-            if (getuid() == 0 && setgroups(0, 0) == -1)
-                throw SysError("setgroups failed");
+                /* Drop additional groups here because we can't do it
+                   after we've created the new user namespace.  FIXME:
+                   this means that if we're not root in the parent
+                   namespace, we can't drop additional groups; they will
+                   be mapped to nogroup in the child namespace. There does
+                   not seem to be a workaround for this. (But who can tell
+                   from reading user_namespaces(7)?)
+                   See also https://lwn.net/Articles/621612/. */
+                if (getuid() == 0 && setgroups(0, 0) == -1)
+                    throw SysError("setgroups failed");
 
-            size_t stackSize = 1 * 1024 * 1024;
-            char * stack = (char *) mmap(0, stackSize,
-                PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
-            if (stack == MAP_FAILED) throw SysError("allocating stack");
+                size_t stackSize = 1 * 1024 * 1024;
+                char * stack = (char *) mmap(0, stackSize,
+                    PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
+                if (stack == MAP_FAILED) throw SysError("allocating stack");
 
-            int flags = CLONE_NEWUSER | CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWIPC | CLONE_NEWUTS | CLONE_PARENT | SIGCHLD;
-            if (privateNetwork)
-                flags |= CLONE_NEWNET;
+                int flags = CLONE_NEWUSER | CLONE_NEWPID | CLONE_NEWNS | CLONE_NEWIPC | CLONE_NEWUTS | CLONE_PARENT | SIGCHLD;
+                if (privateNetwork)
+                    flags |= CLONE_NEWNET;
 
-            pid_t child = clone(childEntry, stack + stackSize, flags, this);
-            if (child == -1 && errno == EINVAL) {
-                /* Fallback for Linux < 2.13 where CLONE_NEWPID and
-                   CLONE_PARENT are not allowed together. */
-                flags &= ~CLONE_NEWPID;
-                child = clone(childEntry, stack + stackSize, flags, this);
-            }
-            if (child == -1 && (errno == EPERM || errno == EINVAL)) {
-                /* Some distros patch Linux to not allow unprivileged
-                 * user namespaces. If we get EPERM or EINVAL, try
-                 * without CLONE_NEWUSER and see if that works.
-                 */
-                flags &= ~CLONE_NEWUSER;
-                child = clone(childEntry, stack + stackSize, flags, this);
-            }
-            /* Otherwise exit with EPERM so we can handle this in the
-               parent. This is only done when sandbox-fallback is set
-               to true (the default). */
-            if (child == -1 && (errno == EPERM || errno == EINVAL) && settings.sandboxFallback)
-                _exit(1);
-            if (child == -1) throw SysError("cloning builder process");
+                pid_t child = clone(childEntry, stack + stackSize, flags, this);
+                if (child == -1 && errno == EINVAL) {
+                    /* Fallback for Linux < 2.13 where CLONE_NEWPID and
+                       CLONE_PARENT are not allowed together. */
+                    flags &= ~CLONE_NEWPID;
+                    child = clone(childEntry, stack + stackSize, flags, this);
+                }
+                if (child == -1 && (errno == EPERM || errno == EINVAL)) {
+                    /* Some distros patch Linux to not allow unprivileged
+                     * user namespaces. If we get EPERM or EINVAL, try
+                     * without CLONE_NEWUSER and see if that works.
+                     */
+                    flags &= ~CLONE_NEWUSER;
+                    child = clone(childEntry, stack + stackSize, flags, this);
+                }
+                /* Otherwise exit with EPERM so we can handle this in the
+                   parent. This is only done when sandbox-fallback is set
+                   to true (the default). */
+                if (child == -1 && (errno == EPERM || errno == EINVAL) && settings.sandboxFallback)
+                    _exit(1);
+                if (child == -1) throw SysError("cloning builder process");
 
-            writeFull(builderOut.writeSide.get(), std::to_string(child) + "\n");
-            _exit(0);
-        }, options);
+                writeFull(builderOut.writeSide.get(), std::to_string(child) + "\n");
+                _exit(0);
+            }, options);
 
         int res = helper.wait();
         if (res != 0 && settings.sandboxFallback) {
@@ -2445,7 +2445,7 @@ void DerivationGoal::startBuilder()
             (format("%d %d 1") % sandboxGid % hostGid).str());
 
         /* Save the mount namespace of the child. We have to do this
-           *before* the child does a chroot. */
+         * before* the child does a chroot. */
         sandboxMountNamespace = open(fmt("/proc/%d/ns/mnt", (pid_t) pid).c_str(), O_RDONLY);
         if (sandboxMountNamespace.get() == -1)
             throw SysError("getting sandbox mount namespace");
@@ -2457,11 +2457,11 @@ void DerivationGoal::startBuilder()
     } else
 #endif
     {
-    fallback:
+fallback:
         options.allowVfork = !buildUser && !drv->isBuiltin();
         pid = startProcess([&]() {
-            runChild();
-        }, options);
+                runChild();
+            }, options);
     }
 
     /* parent */
@@ -2631,23 +2631,23 @@ void DerivationGoal::writeStructuredAttrs()
        arrays or objects are not supported.) */
 
     auto handleSimpleType = [](const nlohmann::json & value) -> std::optional<std::string> {
-        if (value.is_string())
-            return shellEscape(value);
+            if (value.is_string())
+                return shellEscape(value);
 
-        if (value.is_number()) {
-            auto f = value.get<float>();
-            if (std::ceil(f) == f)
-                return std::to_string(value.get<int>());
-        }
+            if (value.is_number()) {
+                auto f = value.get<float>();
+                if (std::ceil(f) == f)
+                    return std::to_string(value.get<int>());
+            }
 
-        if (value.is_null())
-            return std::string("''");
+            if (value.is_null())
+                return std::string("''");
 
-        if (value.is_boolean())
-            return value.get<bool>() ? std::string("1") : std::string("");
+            if (value.is_boolean())
+                return value.get<bool>() ? std::string("1") : std::string("");
 
-        return {};
-    };
+            return {};
+        };
 
     std::string jsonSh;
 
@@ -2886,41 +2886,41 @@ void DerivationGoal::startDaemon()
 
     daemonThread = std::thread([this, store]() {
 
-        while (true) {
+            while (true) {
 
-            /* Accept a connection. */
-            struct sockaddr_un remoteAddr;
-            socklen_t remoteAddrLen = sizeof(remoteAddr);
+                /* Accept a connection. */
+                struct sockaddr_un remoteAddr;
+                socklen_t remoteAddrLen = sizeof(remoteAddr);
 
-            AutoCloseFD remote = accept(daemonSocket.get(),
-                (struct sockaddr *) &remoteAddr, &remoteAddrLen);
-            if (!remote) {
-                if (errno == EINTR) continue;
-                if (errno == EINVAL) break;
-                throw SysError("accepting connection");
+                AutoCloseFD remote = accept(daemonSocket.get(),
+                    (struct sockaddr *) &remoteAddr, &remoteAddrLen);
+                if (!remote) {
+                    if (errno == EINTR) continue;
+                    if (errno == EINVAL) break;
+                    throw SysError("accepting connection");
+                }
+
+                closeOnExec(remote.get());
+
+                debug("received daemon connection");
+
+                auto workerThread = std::thread([store, remote{std::move(remote)}]() {
+                    FdSource from(remote.get());
+                    FdSink to(remote.get());
+                    try {
+                        daemon::processConnection(store, from, to,
+                            daemon::NotTrusted, daemon::Recursive, "nobody", 65535);
+                        debug("terminated daemon connection");
+                    } catch (SysError &) {
+                        ignoreException();
+                    }
+                });
+
+                daemonWorkerThreads.push_back(std::move(workerThread));
             }
 
-            closeOnExec(remote.get());
-
-            debug("received daemon connection");
-
-            auto workerThread = std::thread([store, remote{std::move(remote)}]() {
-                FdSource from(remote.get());
-                FdSink to(remote.get());
-                try {
-                    daemon::processConnection(store, from, to,
-                        daemon::NotTrusted, daemon::Recursive, "nobody", 65535);
-                    debug("terminated daemon connection");
-                } catch (SysError &) {
-                    ignoreException();
-                }
-            });
-
-            daemonWorkerThreads.push_back(std::move(workerThread));
-        }
-
-        debug("daemon shutting down");
-    });
+            debug("daemon shutting down");
+        });
 }
 
 
@@ -2956,24 +2956,24 @@ void DerivationGoal::addDependency(const StorePath & path)
 
         #if __linux__
 
-            Path source = worker.store.Store::toRealPath(path);
-            Path target = chrootRootDir + worker.store.printStorePath(path);
-            debug("bind-mounting %s -> %s", target, source);
+        Path source = worker.store.Store::toRealPath(path);
+        Path target = chrootRootDir + worker.store.printStorePath(path);
+        debug("bind-mounting %s -> %s", target, source);
 
-            if (pathExists(target))
-                throw Error("store path '%s' already exists in the sandbox", worker.store.printStorePath(path));
+        if (pathExists(target))
+            throw Error("store path '%s' already exists in the sandbox", worker.store.printStorePath(path));
 
-            struct stat st;
-            if (lstat(source.c_str(), &st))
-                throw SysError("getting attributes of path '%s'", source);
+        struct stat st;
+        if (lstat(source.c_str(), &st))
+            throw SysError("getting attributes of path '%s'", source);
 
-            if (S_ISDIR(st.st_mode)) {
+        if (S_ISDIR(st.st_mode)) {
 
-                /* Bind-mount the path into the sandbox. This requires
-                   entering its mount namespace, which is not possible
-                   in multithreaded programs. So we do this in a
-                   child process.*/
-                Pid child(startProcess([&]() {
+            /* Bind-mount the path into the sandbox. This requires
+               entering its mount namespace, which is not possible
+               in multithreaded programs. So we do this in a
+               child process.*/
+            Pid child(startProcess([&]() {
 
                     if (setns(sandboxMountNamespace.get(), 0) == -1)
                         throw SysError("entering sandbox mount namespace");
@@ -2986,16 +2986,16 @@ void DerivationGoal::addDependency(const StorePath & path)
                     _exit(0);
                 }));
 
-                int status = child.wait();
-                if (status != 0)
-                    throw Error("could not add path '%s' to sandbox", worker.store.printStorePath(path));
+            int status = child.wait();
+            if (status != 0)
+                throw Error("could not add path '%s' to sandbox", worker.store.printStorePath(path));
 
-            } else
-                linkOrCopy(source, target);
+        } else
+            linkOrCopy(source, target);
 
         #else
-            throw Error("don't know how to make path '%s' (produced by a recursive Nix call) appear in the sandbox",
-                worker.store.printStorePath(path));
+        throw Error("don't know how to make path '%s' (produced by a recursive Nix call) appear in the sandbox",
+            worker.store.printStorePath(path));
         #endif
 
     }
@@ -3021,8 +3021,8 @@ void setupSeccomp()
         throw SysError("unable to initialize seccomp mode 2");
 
     Finally cleanup([&]() {
-        seccomp_release(ctx);
-    });
+            seccomp_release(ctx);
+        });
 
     if (nativeSystem == "x86_64-linux" &&
         seccomp_arch_add(ctx, SCMP_ARCH_X86) != 0)
@@ -3039,15 +3039,15 @@ void setupSeccomp()
     /* Prevent builders from creating setuid/setgid binaries. */
     for (int perm : { S_ISUID, S_ISGID }) {
         if (seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EPERM), SCMP_SYS(chmod), 1,
-                SCMP_A1(SCMP_CMP_MASKED_EQ, (scmp_datum_t) perm, (scmp_datum_t) perm)) != 0)
+            SCMP_A1(SCMP_CMP_MASKED_EQ, (scmp_datum_t) perm, (scmp_datum_t) perm)) != 0)
             throw SysError("unable to add seccomp rule");
 
         if (seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EPERM), SCMP_SYS(fchmod), 1,
-                SCMP_A1(SCMP_CMP_MASKED_EQ, (scmp_datum_t) perm, (scmp_datum_t) perm)) != 0)
+            SCMP_A1(SCMP_CMP_MASKED_EQ, (scmp_datum_t) perm, (scmp_datum_t) perm)) != 0)
             throw SysError("unable to add seccomp rule");
 
         if (seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EPERM), SCMP_SYS(fchmodat), 1,
-                SCMP_A2(SCMP_CMP_MASKED_EQ, (scmp_datum_t) perm, (scmp_datum_t) perm)) != 0)
+            SCMP_A2(SCMP_CMP_MASKED_EQ, (scmp_datum_t) perm, (scmp_datum_t) perm)) != 0)
             throw SysError("unable to add seccomp rule");
     }
 
@@ -3205,23 +3205,23 @@ void DerivationGoal::runChild()
                filesystem that we want in the chroot
                environment. */
             auto doBind = [&](const Path & source, const Path & target, bool optional = false) {
-                debug("bind mounting '%1%' to '%2%'", source, target);
-                struct stat st;
-                if (stat(source.c_str(), &st) == -1) {
-                    if (optional && errno == ENOENT)
-                        return;
-                    else
-                        throw SysError("getting attributes of path '%1%'", source);
-                }
-                if (S_ISDIR(st.st_mode))
-                    createDirs(target);
-                else {
-                    createDirs(dirOf(target));
-                    writeFile(target, "");
-                }
-                if (mount(source.c_str(), target.c_str(), "", MS_BIND | MS_REC, 0) == -1)
-                    throw SysError("bind mount from '%1%' to '%2%' failed", source, target);
-            };
+                    debug("bind mounting '%1%' to '%2%'", source, target);
+                    struct stat st;
+                    if (stat(source.c_str(), &st) == -1) {
+                        if (optional && errno == ENOENT)
+                            return;
+                        else
+                            throw SysError("getting attributes of path '%1%'", source);
+                    }
+                    if (S_ISDIR(st.st_mode))
+                        createDirs(target);
+                    else {
+                        createDirs(dirOf(target));
+                        writeFile(target, "");
+                    }
+                    if (mount(source.c_str(), target.c_str(), "", MS_BIND | MS_REC, 0) == -1)
+                        throw SysError("bind mount from '%1%' to '%2%' failed", source, target);
+                };
 
             for (auto & i : dirsInChroot) {
                 if (i.second.source == "/proc") continue; // backwards compatibility
@@ -3236,7 +3236,7 @@ void DerivationGoal::runChild()
             /* Mount a new tmpfs on /dev/shm to ensure that whatever
                the builder puts in /dev/shm is cleaned up automatically. */
             if (pathExists("/dev/shm") && mount("none", (chrootRootDir + "/dev/shm").c_str(), "tmpfs", 0,
-                    fmt("size=%s", settings.sandboxShmSize).c_str()) == -1)
+                fmt("size=%s", settings.sandboxShmSize).c_str()) == -1)
                 throw SysError("mounting /dev/shm");
 
             /* Mount a new devpts on /dev/pts.  Note that this
@@ -3359,7 +3359,7 @@ void DerivationGoal::runChild()
                admins to specify groups such as "kvm".  */
             if (!buildUser->getSupplementaryGIDs().empty() &&
                 setgroups(buildUser->getSupplementaryGIDs().size(),
-                          buildUser->getSupplementaryGIDs().data()) == -1)
+                    buildUser->getSupplementaryGIDs().data()) == -1)
                 throw SysError("cannot set supplementary groups of build user");
 
             if (setgid(buildUser->getGID()) == -1 ||
@@ -3656,8 +3656,8 @@ void DerivationGoal::registerOutputs()
                 if (buildMode == bmRepair)
                     replaceValidPath(path, actualPath);
                 else
-                    if (buildMode != bmCheck && rename(actualPath.c_str(), worker.store.toRealPath(path).c_str()) == -1)
-                        throw SysError("moving build output '%1%' from the sandbox to the Nix store", path);
+                if (buildMode != bmCheck && rename(actualPath.c_str(), worker.store.toRealPath(path).c_str()) == -1)
+                    throw SysError("moving build output '%1%' from the sandbox to the Nix store", path);
             }
             if (buildMode != bmCheck) actualPath = worker.store.toRealPath(path);
         }
@@ -3685,9 +3685,9 @@ void DerivationGoal::registerOutputs()
         bool rewritten = false;
         if (!outputRewrites.empty()) {
             logWarning({
-                .name = "Rewriting hashes",
-                .hint = hintfmt("rewriting hashes in '%1%'; cross fingers", path)
-            });
+                    .name = "Rewriting hashes",
+                    .hint = hintfmt("rewriting hashes in '%1%'; cross fingers", path)
+                });
 
             /* Canonicalise first.  This ensures that the path we're
                rewriting doesn't contain a hard link to /etc/shadow or
@@ -3853,9 +3853,9 @@ void DerivationGoal::registerOutputs()
                 bool prevExists = keepPreviousRound && pathExists(prev);
                 hintformat hint = prevExists
                     ? hintfmt("output '%s' of '%s' differs from '%s' from previous round",
-                        worker.store.printStorePath(i->second.path), worker.store.printStorePath(drvPath), prev)
+                    worker.store.printStorePath(i->second.path), worker.store.printStorePath(drvPath), prev)
                     : hintfmt("output '%s' of '%s' differs from previous round",
-                        worker.store.printStorePath(i->second.path), worker.store.printStorePath(drvPath));
+                    worker.store.printStorePath(i->second.path), worker.store.printStorePath(drvPath));
 
                 handleDiffHook(
                     buildUser ? buildUser->getUID() : getuid(),
@@ -3867,9 +3867,9 @@ void DerivationGoal::registerOutputs()
                     throw NotDeterministic(hint);
 
                 logError({
-                    .name = "Output determinism error",
-                    .hint = hint
-                });
+                        .name = "Output determinism error",
+                        .hint = hint
+                    });
 
                 curRound = nrRounds; // we know enough, bail out early
             }
@@ -3938,86 +3938,86 @@ void DerivationGoal::checkOutputs(const std::map<Path, ValidPathInfo> & outputs)
            is slightly tricky because some of its references (namely
            other outputs) may not be valid yet. */
         auto getClosure = [&](const StorePath & path)
-        {
-            uint64_t closureSize = 0;
-            StorePathSet pathsDone;
-            std::queue<StorePath> pathsLeft;
-            pathsLeft.push(path);
+            {
+                uint64_t closureSize = 0;
+                StorePathSet pathsDone;
+                std::queue<StorePath> pathsLeft;
+                pathsLeft.push(path);
 
-            while (!pathsLeft.empty()) {
-                auto path = pathsLeft.front();
-                pathsLeft.pop();
-                if (!pathsDone.insert(path).second) continue;
+                while (!pathsLeft.empty()) {
+                    auto path = pathsLeft.front();
+                    pathsLeft.pop();
+                    if (!pathsDone.insert(path).second) continue;
 
-                auto i = outputsByPath.find(worker.store.printStorePath(path));
-                if (i != outputsByPath.end()) {
-                    closureSize += i->second.narSize;
-                    for (auto & ref : i->second.references)
-                        pathsLeft.push(ref);
-                } else {
-                    auto info = worker.store.queryPathInfo(path);
-                    closureSize += info->narSize;
-                    for (auto & ref : info->references)
-                        pathsLeft.push(ref);
+                    auto i = outputsByPath.find(worker.store.printStorePath(path));
+                    if (i != outputsByPath.end()) {
+                        closureSize += i->second.narSize;
+                        for (auto & ref : i->second.references)
+                            pathsLeft.push(ref);
+                    } else {
+                        auto info = worker.store.queryPathInfo(path);
+                        closureSize += info->narSize;
+                        for (auto & ref : info->references)
+                            pathsLeft.push(ref);
+                    }
                 }
-            }
 
-            return std::make_pair(std::move(pathsDone), closureSize);
-        };
+                return std::make_pair(std::move(pathsDone), closureSize);
+            };
 
         auto applyChecks = [&](const Checks & checks)
-        {
-            if (checks.maxSize && info.narSize > *checks.maxSize)
-                throw BuildError("path '%s' is too large at %d bytes; limit is %d bytes",
-                    worker.store.printStorePath(info.path), info.narSize, *checks.maxSize);
-
-            if (checks.maxClosureSize) {
-                uint64_t closureSize = getClosure(info.path).second;
-                if (closureSize > *checks.maxClosureSize)
-                    throw BuildError("closure of path '%s' is too large at %d bytes; limit is %d bytes",
-                        worker.store.printStorePath(info.path), closureSize, *checks.maxClosureSize);
-            }
-
-            auto checkRefs = [&](const std::optional<Strings> & value, bool allowed, bool recursive)
             {
-                if (!value) return;
+                if (checks.maxSize && info.narSize > *checks.maxSize)
+                    throw BuildError("path '%s' is too large at %d bytes; limit is %d bytes",
+                        worker.store.printStorePath(info.path), info.narSize, *checks.maxSize);
 
-                auto spec = parseReferenceSpecifiers(worker.store, *drv, *value);
+                if (checks.maxClosureSize) {
+                    uint64_t closureSize = getClosure(info.path).second;
+                    if (closureSize > *checks.maxClosureSize)
+                        throw BuildError("closure of path '%s' is too large at %d bytes; limit is %d bytes",
+                            worker.store.printStorePath(info.path), closureSize, *checks.maxClosureSize);
+                }
 
-                auto used = recursive
+                auto checkRefs = [&](const std::optional<Strings> & value, bool allowed, bool recursive)
+                {
+                    if (!value) return;
+
+                    auto spec = parseReferenceSpecifiers(worker.store, *drv, *value);
+
+                    auto used = recursive
                     ? getClosure(info.path).first
                     : info.references;
 
-                if (recursive && checks.ignoreSelfRefs)
-                    used.erase(info.path);
+                    if (recursive && checks.ignoreSelfRefs)
+                        used.erase(info.path);
 
-                StorePathSet badPaths;
+                    StorePathSet badPaths;
 
-                for (auto & i : used)
-                    if (allowed) {
-                        if (!spec.count(i))
-                            badPaths.insert(i);
-                    } else {
-                        if (spec.count(i))
-                            badPaths.insert(i);
+                    for (auto & i : used)
+                        if (allowed) {
+                            if (!spec.count(i))
+                                badPaths.insert(i);
+                        } else {
+                            if (spec.count(i))
+                                badPaths.insert(i);
+                        }
+
+                    if (!badPaths.empty()) {
+                        string badPathsStr;
+                        for (auto & i : badPaths) {
+                            badPathsStr += "\n  ";
+                            badPathsStr += worker.store.printStorePath(i);
+                        }
+                        throw BuildError("output '%s' is not allowed to refer to the following paths:%s",
+                            worker.store.printStorePath(info.path), badPathsStr);
                     }
+                };
 
-                if (!badPaths.empty()) {
-                    string badPathsStr;
-                    for (auto & i : badPaths) {
-                        badPathsStr += "\n  ";
-                        badPathsStr += worker.store.printStorePath(i);
-                    }
-                    throw BuildError("output '%s' is not allowed to refer to the following paths:%s",
-                        worker.store.printStorePath(info.path), badPathsStr);
-                }
+                checkRefs(checks.allowedReferences, true, false);
+                checkRefs(checks.allowedRequisites, true, true);
+                checkRefs(checks.disallowedReferences, false, false);
+                checkRefs(checks.disallowedRequisites, false, true);
             };
-
-            checkRefs(checks.allowedReferences, true, false);
-            checkRefs(checks.allowedRequisites, true, true);
-            checkRefs(checks.disallowedReferences, false, false);
-            checkRefs(checks.disallowedRequisites, false, true);
-        };
 
         if (auto structuredAttrs = parsedDrv->getStructuredAttrs()) {
             auto outputChecks = structuredAttrs->find("outputChecks");
@@ -4036,19 +4036,19 @@ void DerivationGoal::checkOutputs(const std::map<Path, ValidPathInfo> & outputs)
                         checks.maxClosureSize = maxClosureSize->get<uint64_t>();
 
                     auto get = [&](const std::string & name) -> std::optional<Strings> {
-                        auto i = output->find(name);
-                        if (i != output->end()) {
-                            Strings res;
-                            for (auto j = i->begin(); j != i->end(); ++j) {
-                                if (!j->is_string())
-                                    throw Error("attribute '%s' of derivation '%s' must be a list of strings", name, worker.store.printStorePath(drvPath));
-                                res.push_back(j->get<std::string>());
+                            auto i = output->find(name);
+                            if (i != output->end()) {
+                                Strings res;
+                                for (auto j = i->begin(); j != i->end(); ++j) {
+                                    if (!j->is_string())
+                                        throw Error("attribute '%s' of derivation '%s' must be a list of strings", name, worker.store.printStorePath(drvPath));
+                                    res.push_back(j->get<std::string>());
+                                }
+                                checks.disallowedRequisites = res;
+                                return res;
                             }
-                            checks.disallowedRequisites = res;
-                            return res;
-                        }
-                        return {};
-                    };
+                            return {};
+                        };
 
                     checks.allowedReferences = get("allowedReferences");
                     checks.allowedRequisites = get("allowedRequisites");
@@ -4444,10 +4444,10 @@ void SubstitutionGoal::tryNext()
         && !info->checkSignatures(worker.store, worker.store.getPublicKeys()))
     {
         logWarning({
-            .name = "Invalid path signature",
-            .hint = hintfmt("substituter '%s' does not have a valid signature for path '%s'",
-                sub->getUri(), worker.store.printStorePath(storePath))
-        });
+                .name = "Invalid path signature",
+                .hint = hintfmt("substituter '%s' does not have a valid signature for path '%s'",
+                    sub->getUri(), worker.store.printStorePath(storePath))
+            });
         tryNext();
         return;
     }
@@ -4505,21 +4505,21 @@ void SubstitutionGoal::tryToRun()
     promise = std::promise<void>();
 
     thr = std::thread([this]() {
-        try {
-            /* Wake up the worker loop when we're done. */
-            Finally updateStats([this]() { outPipe.writeSide = -1; });
+            try {
+                /* Wake up the worker loop when we're done. */
+                Finally updateStats([this]() { outPipe.writeSide = -1; });
 
-            Activity act(*logger, actSubstitute, Logger::Fields{worker.store.printStorePath(storePath), sub->getUri()});
-            PushActivity pact(act.id);
+                Activity act(*logger, actSubstitute, Logger::Fields{worker.store.printStorePath(storePath), sub->getUri()});
+                PushActivity pact(act.id);
 
-            copyStorePath(ref<Store>(sub), ref<Store>(worker.store.shared_from_this()),
-                storePath, repair, sub->isTrusted ? NoCheckSigs : CheckSigs);
+                copyStorePath(ref<Store>(sub), ref<Store>(worker.store.shared_from_this()),
+                    storePath, repair, sub->isTrusted ? NoCheckSigs : CheckSigs);
 
-            promise.set_value();
-        } catch (...) {
-            promise.set_exception(std::current_exception());
-        }
-    });
+                promise.set_value();
+            } catch (...) {
+                promise.set_exception(std::current_exception());
+            }
+        });
 
     worker.childStarted(shared_from_this(), {outPipe.readSide.get()}, true, false);
 
@@ -4808,7 +4808,7 @@ void Worker::run(const Goals & _topGoals)
         else {
             if (awake.empty() && 0 == settings.maxBuildJobs)
                 throw Error("unable to start any build; either increase '--max-jobs' "
-                            "or enable remote builds");
+                    "or enable remote builds");
             assert(!awake.empty());
         }
     }
@@ -4880,7 +4880,7 @@ void Worker::waitForInput()
     }
 
     if (poll(pollStatus.data(), pollStatus.size(),
-            useTimeout ? timeout * 1000 : -1) == -1) {
+        useTimeout ? timeout * 1000 : -1) == -1) {
         if (errno == EINTR) return;
         throw SysError("waiting for input");
     }
@@ -4928,18 +4928,18 @@ void Worker::waitForInput()
             after - j->lastOutput >= std::chrono::seconds(settings.maxSilentTime))
         {
             goal->timedOut(Error(
-                    "%1% timed out after %2% seconds of silence",
-                    goal->getName(), settings.maxSilentTime));
+                "%1% timed out after %2% seconds of silence",
+                goal->getName(), settings.maxSilentTime));
         }
 
         else if (goal->exitCode == Goal::ecBusy &&
-            0 != settings.buildTimeout &&
-            j->respectTimeouts &&
-            after - j->timeStarted >= std::chrono::seconds(settings.buildTimeout))
+                 0 != settings.buildTimeout &&
+                 j->respectTimeouts &&
+                 after - j->timeStarted >= std::chrono::seconds(settings.buildTimeout))
         {
             goal->timedOut(Error(
-                    "%1% timed out after %2% seconds",
-                    goal->getName(), settings.buildTimeout));
+                "%1% timed out after %2% seconds",
+                goal->getName(), settings.buildTimeout));
         }
     }
 
@@ -4999,9 +4999,9 @@ bool Worker::pathContentsGood(const StorePath & path)
     pathContentsGoodCache.insert_or_assign(path, res);
     if (!res)
         logError({
-            .name = "Corrupted path",
-            .hint = hintfmt("path '%s' is corrupted or missing!", store.printStorePath(path))
-        });
+                .name = "Corrupted path",
+                .hint = hintfmt("path '%s' is corrupted or missing!", store.printStorePath(path))
+            });
     return res;
 }
 

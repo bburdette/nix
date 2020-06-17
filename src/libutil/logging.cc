@@ -57,11 +57,11 @@ public:
         if (systemd) {
             char c;
             switch (lvl) {
-            case lvlError: c = '3'; break;
-            case lvlWarn: c = '4'; break;
-            case lvlInfo: c = '5'; break;
-            case lvlTalkative: case lvlChatty: c = '6'; break;
-            default: c = '7';
+                case lvlError: c = '3'; break;
+                case lvlWarn: c = '4'; break;
+                case lvlInfo: c = '5'; break;
+                case lvlTalkative: case lvlChatty: c = '6'; break;
+                default: c = '7';
             }
             prefix = std::string("<") + c + ">";
         }
@@ -274,9 +274,9 @@ bool handleJSONLogMessage(const std::string & msg,
 
     } catch (std::exception & e) {
         logError({
-            .name = "Json log message",
-            .hint = hintfmt("bad log message from builder: %s", e.what())
-        });
+                .name = "Json log message",
+                .hint = hintfmt("bad log message from builder: %s", e.what())
+            });
     }
 
     return true;

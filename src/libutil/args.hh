@@ -53,14 +53,14 @@ protected:
             Handler(std::function<void(std::string)> && handler)
                 : fun([handler{std::move(handler)}](std::vector<std::string> ss) {
                     handler(std::move(ss[0]));
-                  })
+                })
                 , arity(1)
             { }
 
             Handler(std::function<void(std::string, std::string)> && handler)
                 : fun([handler{std::move(handler)}](std::vector<std::string> ss) {
                     handler(std::move(ss[0]), std::move(ss[1]));
-                  })
+                })
                 , arity(2)
             { }
 
@@ -121,12 +121,12 @@ public:
         std::function<void(std::string)> fun)
     {
         addFlag({
-            .longName = longName,
-            .shortName = shortName,
-            .description = description,
-            .labels = {label},
-            .handler = {[=](std::string s) { fun(s); }}
-        });
+                .longName = longName,
+                .shortName = shortName,
+                .description = description,
+                .labels = {label},
+                .handler = {[=](std::string s) { fun(s); }}
+            });
     }
 
     void mkFlag(char shortName, const std::string & name,
@@ -140,11 +140,11 @@ public:
         T * dest, const T & value)
     {
         addFlag({
-            .longName = longName,
-            .shortName = shortName,
-            .description = description,
-            .handler = {[=]() { *dest = value; }}
-        });
+                .longName = longName,
+                .shortName = shortName,
+                .description = description,
+                .handler = {[=]() { *dest = value; }}
+            });
     }
 
     template<class I>
@@ -152,8 +152,8 @@ public:
         const std::string & description, I * dest)
     {
         mkFlag<I>(shortName, longName, description, [=](I n) {
-            *dest = n;
-        });
+                *dest = n;
+            });
     }
 
     template<class I>
@@ -161,33 +161,33 @@ public:
         const std::string & description, std::function<void(I)> fun)
     {
         addFlag({
-            .longName = longName,
-            .shortName = shortName,
-            .description = description,
-            .labels = {"N"},
-            .handler = {[=](std::string s) {
-                I n;
-                if (!string2Int(s, n))
-                    throw UsageError("flag '--%s' requires a integer argument", longName);
-                fun(n);
-            }}
-        });
+                .longName = longName,
+                .shortName = shortName,
+                .description = description,
+                .labels = {"N"},
+                .handler = {[=](std::string s) {
+                        I n;
+                        if (!string2Int(s, n))
+                            throw UsageError("flag '--%s' requires a integer argument", longName);
+                        fun(n);
+                    }}
+            });
     }
 
     /* Expect a string argument. */
     void expectArg(const std::string & label, string * dest, bool optional = false)
     {
         expectedArgs.push_back(ExpectedArg{label, 1, optional, [=](std::vector<std::string> ss) {
-            *dest = ss[0];
-        }});
+                    *dest = ss[0];
+                }});
     }
 
     /* Expect 0 or more arguments. */
     void expectArgs(const std::string & label, std::vector<std::string> * dest)
     {
         expectedArgs.push_back(ExpectedArg{label, 0, false, [=](std::vector<std::string> ss) {
-            *dest = std::move(ss);
-        }});
+                    *dest = std::move(ss);
+                }});
     }
 
     friend class MultiCommand;

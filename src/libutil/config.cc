@@ -181,12 +181,12 @@ template<typename T>
 void BaseSetting<T>::convertToArg(Args & args, const std::string & category)
 {
     args.addFlag({
-        .longName = name,
-        .description = description,
-        .category = category,
-        .labels = {"value"},
-        .handler = {[=](std::string s) { overriden = true; set(s); }},
-    });
+            .longName = name,
+            .description = description,
+            .category = category,
+            .labels = {"value"},
+            .handler = {[=](std::string s) { overriden = true; set(s); }},
+        });
 }
 
 template<> void BaseSetting<std::string>::set(const std::string & str)
@@ -232,17 +232,17 @@ template<> std::string BaseSetting<bool>::to_string() const
 template<> void BaseSetting<bool>::convertToArg(Args & args, const std::string & category)
 {
     args.addFlag({
-        .longName = name,
-        .description = description,
-        .category = category,
-        .handler = {[=]() { override(true); }}
-    });
+            .longName = name,
+            .description = description,
+            .category = category,
+            .handler = {[=]() { override (true); }}
+        });
     args.addFlag({
-        .longName = "no-" + name,
-        .description = description,
-        .category = category,
-        .handler = {[=]() { override(false); }}
-    });
+            .longName = "no-" + name,
+            .description = description,
+            .category = category,
+            .handler = {[=]() { override (false); }}
+        });
 }
 
 template<> void BaseSetting<Strings>::set(const std::string & str)

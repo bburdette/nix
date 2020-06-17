@@ -17,10 +17,10 @@ void builtinFetchurl(const BasicDerivation & drv, const std::string & netrcData)
     }
 
     auto getAttr = [&](const string & name) {
-        auto i = drv.env.find(name);
-        if (i == drv.env.end()) throw Error("attribute '%s' missing", name);
-        return i->second;
-    };
+            auto i = drv.env.find(name);
+            if (i == drv.env.end()) throw Error("attribute '%s' missing", name);
+            return i->second;
+        };
 
     Path storePath = getAttr("out");
     auto mainUrl = getAttr("url");
@@ -32,31 +32,31 @@ void builtinFetchurl(const BasicDerivation & drv, const std::string & netrcData)
 
     auto fetch = [&](const std::string & url) {
 
-        auto source = sinkToSource([&](Sink & sink) {
+            auto source = sinkToSource([&](Sink & sink) {
 
-            /* No need to do TLS verification, because we check the hash of
-               the result anyway. */
-            FileTransferRequest request(url);
-            request.verifyTLS = false;
-            request.decompress = false;
+                /* No need to do TLS verification, because we check the hash of
+                   the result anyway. */
+                FileTransferRequest request(url);
+                request.verifyTLS = false;
+                request.decompress = false;
 
-            auto decompressor = makeDecompressionSink(
-                unpack && hasSuffix(mainUrl, ".xz") ? "xz" : "none", sink);
-            fileTransfer->download(std::move(request), *decompressor);
-            decompressor->finish();
-        });
+                auto decompressor = makeDecompressionSink(
+                    unpack && hasSuffix(mainUrl, ".xz") ? "xz" : "none", sink);
+                fileTransfer->download(std::move(request), *decompressor);
+                decompressor->finish();
+            });
 
-        if (unpack)
-            restorePath(storePath, *source);
-        else
-            writeFile(storePath, *source);
+            if (unpack)
+                restorePath(storePath, *source);
+            else
+                writeFile(storePath, *source);
 
-        auto executable = drv.env.find("executable");
-        if (executable != drv.env.end() && executable->second == "1") {
-            if (chmod(storePath.c_str(), 0755) == -1)
-                throw SysError("making '%1%' executable", storePath);
-        }
-    };
+            auto executable = drv.env.find("executable");
+            if (executable != drv.env.end() && executable->second == "1") {
+                if (chmod(storePath.c_str(), 0755) == -1)
+                    throw SysError("making '%1%' executable", storePath);
+            }
+        };
 
     /* Try the hashed mirrors first. */
     if (getAttr("outputHashMode") == "flat")

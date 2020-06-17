@@ -7,17 +7,17 @@ NarInfo::NarInfo(const Store & store, const std::string & s, const std::string &
     : ValidPathInfo(StorePath(StorePath::dummy)) // FIXME: hack
 {
     auto corrupt = [&]() {
-        throw Error("NAR info file '%1%' is corrupt", whence);
-    };
+            throw Error("NAR info file '%1%' is corrupt", whence);
+        };
 
     auto parseHashField = [&](const string & s) {
-        try {
-            return Hash(s);
-        } catch (BadHash &) {
-            corrupt();
-            return Hash(); // never reached
-        }
-    };
+            try {
+                return Hash(s);
+            } catch (BadHash &) {
+                corrupt();
+                return Hash(); // never reached
+            }
+        };
 
     bool havePath = false;
 

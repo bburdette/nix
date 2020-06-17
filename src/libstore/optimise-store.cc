@@ -101,7 +101,7 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
 #if __APPLE__
     /* HFS/macOS has some undocumented security feature disabling hardlinking for
        special files within .app dirs. *.app/Contents/PkgInfo and
-       *.app/Contents/Resources/\*.lproj seem to be the only paths affected. See
+     *.app/Contents/Resources/\*.lproj seem to be the only paths affected. See
        https://github.com/NixOS/nix/issues/1443 for more discussion. */
 
     if (std::regex_search(path, std::regex("\\.app/Contents/.+$")))
@@ -131,9 +131,9 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
        those files.  FIXME: check the modification time. */
     if (S_ISREG(st.st_mode) && (st.st_mode & S_IWUSR)) {
         logWarning({
-            .name = "Suspicious file",
-            .hint = hintfmt("skipping suspicious writable file '%1%'", path)
-        });
+                .name = "Suspicious file",
+                .hint = hintfmt("skipping suspicious writable file '%1%'", path)
+            });
         return;
     }
 
@@ -158,7 +158,7 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
     /* Check if this is a known hash. */
     Path linkPath = linksDir + "/" + hash.to_string(Base32, false);
 
- retry:
+retry:
     if (!pathExists(linkPath)) {
         /* Nope, create a hard link in the links directory. */
         if (link(path.c_str(), linkPath.c_str()) == 0) {
@@ -167,21 +167,21 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
         }
 
         switch (errno) {
-        case EEXIST:
-            /* Fall through if another process created ‘linkPath’ before
-               we did. */
-            break;
+            case EEXIST:
+                /* Fall through if another process created ‘linkPath’ before
+                   we did. */
+                break;
 
-        case ENOSPC:
-            /* On ext4, that probably means the directory index is
-               full.  When that happens, it's fine to ignore it: we
-               just effectively disable deduplication of this
-               file.  */
-            printInfo("cannot link '%s' to '%s': %s", linkPath, path, strerror(errno));
-            return;
+            case ENOSPC:
+                /* On ext4, that probably means the directory index is
+                   full.  When that happens, it's fine to ignore it: we
+                   just effectively disable deduplication of this
+                   file.  */
+                printInfo("cannot link '%s' to '%s': %s", linkPath, path, strerror(errno));
+                return;
 
-        default:
-            throw SysError("cannot link '%1%' to '%2%'", linkPath, path);
+            default:
+                throw SysError("cannot link '%1%' to '%2%'", linkPath, path);
         }
     }
 
@@ -198,9 +198,9 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
 
     if (st.st_size != stLink.st_size) {
         logWarning({
-            .name = "Corrupted link",
-            .hint = hintfmt("removing corrupted link '%1%'", linkPath)
-        });
+                .name = "Corrupted link",
+                .hint = hintfmt("removing corrupted link '%1%'", linkPath)
+            });
         unlink(linkPath.c_str());
         goto retry;
     }
@@ -218,7 +218,7 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
     MakeReadOnly makeReadOnly(mustToggle ? dirOf(path) : "");
 
     Path tempLink = (format("%1%/.tmp-link-%2%-%3%")
-        % realStoreDir % getpid() % random()).str();
+                     % realStoreDir % getpid() % random()).str();
 
     if (link(linkPath.c_str(), tempLink.c_str()) == -1) {
         if (errno == EMLINK) {
@@ -236,9 +236,9 @@ void LocalStore::optimisePath_(Activity * act, OptimiseStats & stats,
     if (rename(tempLink.c_str(), path.c_str()) == -1) {
         if (unlink(tempLink.c_str()) == -1)
             logError({
-                .name = "Unlink error",
-                .hint = hintfmt("unable to unlink '%1%'", tempLink)
-            });
+                    .name = "Unlink error",
+                    .hint = hintfmt("unable to unlink '%1%'", tempLink)
+                });
         if (errno == EMLINK) {
             /* Some filesystems generate too many links on the rename,
                rather than on the original link.  (Probably it

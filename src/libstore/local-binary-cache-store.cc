@@ -91,15 +91,15 @@ void LocalBinaryCacheStore::upsertFile(const std::string & path,
 }
 
 static RegisterStoreImplementation regStore([](
-    const std::string & uri, const Store::Params & params)
+        const std::string & uri, const Store::Params & params)
     -> std::shared_ptr<Store>
-{
-    if (getEnv("_NIX_FORCE_HTTP_BINARY_CACHE_STORE") == "1" ||
-        std::string(uri, 0, 7) != "file://")
-        return 0;
-    auto store = std::make_shared<LocalBinaryCacheStore>(params, std::string(uri, 7));
-    store->init();
-    return store;
-});
+    {
+        if (getEnv("_NIX_FORCE_HTTP_BINARY_CACHE_STORE") == "1" ||
+            std::string(uri, 0, 7) != "file://")
+            return 0;
+        auto store = std::make_shared<LocalBinaryCacheStore>(params, std::string(uri, 7));
+        store->init();
+        return store;
+    });
 
 }

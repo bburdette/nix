@@ -67,50 +67,50 @@ struct NixArgs : virtual MultiCommand, virtual MixCommonArgs
         categories[catNixInstallation] = "Commands for upgrading or troubleshooting your Nix installation";
 
         addFlag({
-            .longName = "help",
-            .description = "show usage information",
-            .handler = {[&]() { showHelpAndExit(); }},
-        });
+                .longName = "help",
+                .description = "show usage information",
+                .handler = {[&]() { showHelpAndExit(); }},
+            });
 
         addFlag({
-            .longName = "help-config",
-            .description = "show configuration options",
-            .handler = {[&]() {
-                std::cout << "The following configuration options are available:\n\n";
-                Table2 tbl;
-                std::map<std::string, Config::SettingInfo> settings;
-                globalConfig.getSettings(settings);
-                for (const auto & s : settings)
-                    tbl.emplace_back(s.first, s.second.description);
-                printTable(std::cout, tbl);
-                throw Exit();
-            }},
-        });
+                .longName = "help-config",
+                .description = "show configuration options",
+                .handler = {[&]() {
+                        std::cout << "The following configuration options are available:\n\n";
+                        Table2 tbl;
+                        std::map<std::string, Config::SettingInfo> settings;
+                        globalConfig.getSettings(settings);
+                        for (const auto & s : settings)
+                            tbl.emplace_back(s.first, s.second.description);
+                        printTable(std::cout, tbl);
+                        throw Exit();
+                    }},
+            });
 
         addFlag({
-            .longName = "print-build-logs",
-            .shortName = 'L',
-            .description = "print full build logs on stderr",
-            .handler = {[&]() {setLogFormat(LogFormat::barWithLogs); }},
-        });
+                .longName = "print-build-logs",
+                .shortName = 'L',
+                .description = "print full build logs on stderr",
+                .handler = {[&]() {setLogFormat(LogFormat::barWithLogs); }},
+            });
 
         addFlag({
-            .longName = "version",
-            .description = "show version information",
-            .handler = {[&]() { printVersion(programName); }},
-        });
+                .longName = "version",
+                .description = "show version information",
+                .handler = {[&]() { printVersion(programName); }},
+            });
 
         addFlag({
-            .longName = "no-net",
-            .description = "disable substituters and consider all previously downloaded files up-to-date",
-            .handler = {[&]() { useNet = false; }},
-        });
+                .longName = "no-net",
+                .description = "disable substituters and consider all previously downloaded files up-to-date",
+                .handler = {[&]() { useNet = false; }},
+            });
 
         addFlag({
-            .longName = "refresh",
-            .description = "consider all previously downloaded files out-of-date",
-            .handler = {[&]() { refresh = true; }},
-        });
+                .longName = "refresh",
+                .description = "consider all previously downloaded files out-of-date",
+                .handler = {[&]() { refresh = true; }},
+            });
 
         deprecatedAliases.insert({"dev-shell", "develop"});
     }
@@ -168,7 +168,7 @@ void mainWrapped(int argc, char * * argv)
 
     setLogFormat("bar");
 
-    Finally f([] { logger->stop(); });
+    Finally f([]{ logger->stop(); });
 
     NixArgs args;
 

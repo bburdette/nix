@@ -37,7 +37,7 @@ bool Machine::allSupported(const std::set<string> & features) const {
     return std::all_of(features.begin(), features.end(),
         [&](const string & feature) {
             return supportedFeatures.count(feature) ||
-                mandatoryFeatures.count(feature);
+            mandatoryFeatures.count(feature);
         });
 }
 
@@ -73,8 +73,8 @@ void parseMachines(const std::string & s, Machines & machines)
             throw FormatError("bad machine specification '%s'", line);
 
         auto isSet = [&](size_t n) {
-            return tokens.size() > n && tokens[n] != "" && tokens[n] != "-";
-        };
+                return tokens.size() > n && tokens[n] != "" && tokens[n] != "-";
+            };
 
         machines.emplace_back(tokens[0],
             isSet(1) ? tokenizeString<std::vector<string>>(tokens[1], ",") : std::vector<string>{settings.thisSystem},
@@ -90,10 +90,10 @@ void parseMachines(const std::string & s, Machines & machines)
 Machines getMachines()
 {
     static auto machines = [&]() {
-        Machines machines;
-        parseMachines(settings.builders, machines);
-        return machines;
-    }();
+            Machines machines;
+            parseMachines(settings.builders, machines);
+            return machines;
+        }();
     return machines;
 }
 

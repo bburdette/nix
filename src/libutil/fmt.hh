@@ -101,13 +101,13 @@ std::ostream& operator<<(std::ostream &out, const normaltxt<T> &y)
 class hintformat
 {
 public:
-    hintformat(const string &format) :fmt(format)
+    hintformat(const string &format) : fmt(format)
     {
         fmt.exceptions(boost::io::all_error_bits ^ boost::io::too_many_args_bit);
     }
 
     hintformat(const hintformat &hf)
-    : fmt(hf.fmt)
+        : fmt(hf.fmt)
     {}
 
     template<class T>

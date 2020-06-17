@@ -74,7 +74,7 @@ struct LocalStoreAccessor : public FSAccessor
 ref<FSAccessor> LocalFSStore::getFSAccessor()
 {
     return make_ref<LocalStoreAccessor>(ref<LocalFSStore>(
-            std::dynamic_pointer_cast<LocalFSStore>(shared_from_this())));
+        std::dynamic_pointer_cast<LocalFSStore>(shared_from_this())));
 }
 
 void LocalFSStore::narFromPath(const StorePath & path, Sink & sink)

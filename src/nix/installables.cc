@@ -16,12 +16,12 @@ namespace nix {
 SourceExprCommand::SourceExprCommand()
 {
     addFlag({
-        .longName = "file",
-        .shortName = 'f',
-        .description = "evaluate FILE rather than the default",
-        .labels = {"file"},
-        .handler = {&file}
-    });
+            .longName = "file",
+            .shortName = 'f',
+            .description = "evaluate FILE rather than the default",
+            .labels = {"file"},
+            .handler = {&file}
+        });
 }
 
 Value * SourceExprCommand::getSourceExpr(EvalState & state)
@@ -48,15 +48,15 @@ Value * SourceExprCommand::getSourceExpr(EvalState & state)
         std::unordered_set<std::string> seen;
 
         auto addEntry = [&](const std::string & name) {
-            if (name == "") return;
-            if (!seen.insert(name).second) return;
-            Value * v1 = state.allocValue();
-            mkPrimOpApp(*v1, state.getBuiltin("findFile"), state.getBuiltin("nixPath"));
-            Value * v2 = state.allocValue();
-            mkApp(*v2, *v1, mkString(*state.allocValue(), name));
-            mkApp(*state.allocAttr(**vSourceExpr, state.symbols.create(name)),
-                state.getBuiltin("import"), *v2);
-        };
+                if (name == "") return;
+                if (!seen.insert(name).second) return;
+                Value * v1 = state.allocValue();
+                mkPrimOpApp(*v1, state.getBuiltin("findFile"), state.getBuiltin("nixPath"));
+                Value * v2 = state.allocValue();
+                mkApp(*v2, *v1, mkString(*state.allocValue(), name));
+                mkApp(*state.allocAttr(**vSourceExpr, state.symbols.create(name)),
+                    state.getBuiltin("import"), *v2);
+            };
 
         for (auto & i : searchPath)
             /* Hack to handle channels. */
@@ -172,7 +172,7 @@ struct InstallableExpr : InstallableValue
     std::string text;
 
     InstallableExpr(SourceExprCommand & cmd, const std::string & text)
-         : InstallableValue(cmd), text(text) { }
+        : InstallableValue(cmd), text(text) { }
 
     std::string what() override { return text; }
 
@@ -304,7 +304,7 @@ StorePath toStorePath(ref<Store> store, RealiseMode mode,
     auto paths = toStorePaths(store, mode, {installable});
 
     if (paths.size() != 1)
-            throw Error("argument '%s' should evaluate to one store path", installable->what());
+        throw Error("argument '%s' should evaluate to one store path", installable->what());
 
     return *paths.begin();
 }

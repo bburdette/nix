@@ -63,18 +63,18 @@ void printCodeLines(std::ostream &out, const string &prefix, const NixCode &nixC
     if (nixCode.prevLineOfCode.has_value()) {
         out << std::endl
             << fmt("%1% %|2$5d|| %3%",
-                prefix,
-                (nixCode.errPos.line - 1),
-                *nixCode.prevLineOfCode);
+            prefix,
+            (nixCode.errPos.line - 1),
+            *nixCode.prevLineOfCode);
     }
 
     if (nixCode.errLineOfCode.has_value()) {
         // line of code containing the error.
         out << std::endl
             << fmt("%1% %|2$5d|| %3%",
-                prefix,
-                (nixCode.errPos.line),
-                *nixCode.errLineOfCode);
+            prefix,
+            (nixCode.errPos.line),
+            *nixCode.errLineOfCode);
         // error arrows for the column range.
         if (nixCode.errPos.column > 0) {
             int start = nixCode.errPos.column;
@@ -87,9 +87,9 @@ void printCodeLines(std::ostream &out, const string &prefix, const NixCode &nixC
 
             out << std::endl
                 << fmt("%1%      |%2%" ANSI_RED "%3%" ANSI_NORMAL,
-                    prefix,
-                    spaces,
-                    arrows);
+                prefix,
+                spaces,
+                arrows);
         }
     }
 
@@ -97,9 +97,9 @@ void printCodeLines(std::ostream &out, const string &prefix, const NixCode &nixC
     if (nixCode.nextLineOfCode.has_value()) {
         out << std::endl
             << fmt("%1% %|2$5d|| %3%",
-                prefix,
-                (nixCode.errPos.line + 1),
-                *nixCode.nextLineOfCode);
+            prefix,
+            (nixCode.errPos.line + 1),
+            *nixCode.nextLineOfCode);
     }
 }
 

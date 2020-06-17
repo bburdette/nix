@@ -149,7 +149,7 @@ struct StringSink : Sink
     ref<std::string> s;
     StringSink() : s(make_ref<std::string>()) { };
     explicit StringSink(const size_t reservedSize) : s(make_ref<std::string>()) {
-      s->reserve(reservedSize);
+        s->reserve(reservedSize);
     };
     StringSink(ref<std::string> s) : s(s) { };
     void operator () (const unsigned char * data, size_t len) override;
@@ -215,7 +215,7 @@ struct SizedSource : Source
 /* Convert a function into a sink. */
 struct LambdaSink : Sink
 {
-    typedef std::function<void(const unsigned char *, size_t)> lambda_t;
+    typedef std::function<void (const unsigned char *, size_t)> lambda_t;
 
     lambda_t lambda;
 
@@ -248,7 +248,7 @@ struct LambdaSource : Source
    Source executes the function as a coroutine. */
 std::unique_ptr<Source> sinkToSource(
     std::function<void(Sink &)> fun,
-    std::function<void()> eof = []() {
+    std::function<void()> eof = [] () {
         throw EndOfFile("coroutine has finished");
     });
 

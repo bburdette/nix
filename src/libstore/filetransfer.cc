@@ -104,7 +104,7 @@ struct curlFileTransfer : public FileTransfer
                     }
                 } else
                     this->result.data->append((char *) data, len);
-              })
+            })
         {
             if (!request.expectedETag.empty())
                 requestHeaders = curl_slist_append(requestHeaders, ("If-None-Match: " + request.expectedETag).c_str());
@@ -214,9 +214,9 @@ struct curlFileTransfer : public FileTransfer
         int progressCallback(double dltotal, double dlnow)
         {
             try {
-              act.progress(dlnow, dltotal);
+                act.progress(dlnow, dltotal);
             } catch (nix::Interrupted &) {
-              assert(_isInterrupted);
+                assert(_isInterrupted);
             }
             return _isInterrupted;
         }
@@ -267,7 +267,7 @@ struct curlFileTransfer : public FileTransfer
             curl_easy_setopt(req, CURLOPT_NOSIGNAL, 1);
             curl_easy_setopt(req, CURLOPT_USERAGENT,
                 ("curl/" LIBCURL_VERSION " Nix/" + nixVersion +
-                    (fileTransferSettings.userAgentSuffix != "" ? " " + fileTransferSettings.userAgentSuffix.get() : "")).c_str());
+                 (fileTransferSettings.userAgentSuffix != "" ? " " + fileTransferSettings.userAgentSuffix.get() : "")).c_str());
             #if LIBCURL_VERSION_NUM >= 0x072b00
             curl_easy_setopt(req, CURLOPT_PIPEWAIT, 1);
             #endif
@@ -353,7 +353,7 @@ struct curlFileTransfer : public FileTransfer
                 failEx(writeException);
 
             else if (code == CURLE_OK &&
-                (httpStatus == 200 || httpStatus == 201 || httpStatus == 204 || httpStatus == 206 || httpStatus == 304 || httpStatus == 0 /* other protocol */))
+                     (httpStatus == 200 || httpStatus == 201 || httpStatus == 204 || httpStatus == 206 || httpStatus == 304 || httpStatus == 0 /* other protocol */))
             {
                 result.cached = httpStatus == 304;
                 act.progress(result.bodySize, result.bodySize);
@@ -510,8 +510,8 @@ struct curlFileTransfer : public FileTransfer
     {
         /* Cause this thread to be notified on SIGINT. */
         auto callback = createInterruptCallback([&]() {
-            stopWorkerThread();
-        });
+                stopWorkerThread();
+            });
 
         std::map<CURL *, std::shared_ptr<TransferItem>> items;
 
@@ -609,10 +609,10 @@ struct curlFileTransfer : public FileTransfer
         } catch (nix::Interrupted & e) {
         } catch (std::exception & e) {
             logError({
-                .name = "File transfer",
-                .hint = hintfmt("unexpected error in download thread: %s",
-                                e.what())
-            });
+                    .name = "File transfer",
+                    .hint = hintfmt("unexpected error in download thread: %s",
+                        e.what())
+                });
         }
 
         {
@@ -644,8 +644,8 @@ struct curlFileTransfer : public FileTransfer
         auto [path, params] = splitUriAndParams(uri);
 
         auto slash = path.find('/', 5); // 5 is the length of "s3://" prefix
-            if (slash == std::string::npos)
-                throw nix::Error("bad S3 URI '%s'", path);
+        if (slash == std::string::npos)
+            throw nix::Error("bad S3 URI '%s'", path);
 
         std::string bucketName(path, 5, slash - 5);
         std::string key(path, slash + 1);
@@ -705,12 +705,12 @@ std::future<FileTransferResult> FileTransfer::enqueueFileTransfer(const FileTran
     auto promise = std::make_shared<std::promise<FileTransferResult>>();
     enqueueFileTransfer(request,
         {[promise](std::future<FileTransferResult> fut) {
-            try {
-                promise->set_value(fut.get());
-            } catch (...) {
-                promise->set_exception(std::current_exception());
-            }
-        }});
+                try {
+                    promise->set_value(fut.get());
+                } catch (...) {
+                    promise->set_exception(std::current_exception());
+                }
+            }});
     return promise->get_future();
 }
 
@@ -747,45 +747,45 @@ void FileTransfer::download(FileTransferRequest && request, Sink & sink)
     /* In case of an exception, wake up the download thread. FIXME:
        abort the download request. */
     Finally finally([&]() {
-        auto state(_state->lock());
-        state->quit = true;
-        state->request.notify_one();
-    });
+            auto state(_state->lock());
+            state->quit = true;
+            state->request.notify_one();
+        });
 
     request.dataCallback = [_state](char * buf, size_t len) {
 
-        auto state(_state->lock());
+            auto state(_state->lock());
 
-        if (state->quit) return;
+            if (state->quit) return;
 
-        /* If the buffer is full, then go to sleep until the calling
-           thread wakes us up (i.e. when it has removed data from the
-           buffer). We don't wait forever to prevent stalling the
-           download thread. (Hopefully sleeping will throttle the
-           sender.) */
-        if (state->data.size() > 1024 * 1024) {
-            debug("download buffer is full; going to sleep");
-            state.wait_for(state->request, std::chrono::seconds(10));
-        }
+            /* If the buffer is full, then go to sleep until the calling
+               thread wakes us up (i.e. when it has removed data from the
+               buffer). We don't wait forever to prevent stalling the
+               download thread. (Hopefully sleeping will throttle the
+               sender.) */
+            if (state->data.size() > 1024 * 1024) {
+                debug("download buffer is full; going to sleep");
+                state.wait_for(state->request, std::chrono::seconds(10));
+            }
 
-        /* Append data to the buffer and wake up the calling
-           thread. */
-        state->data.append(buf, len);
-        state->avail.notify_one();
-    };
+            /* Append data to the buffer and wake up the calling
+               thread. */
+            state->data.append(buf, len);
+            state->avail.notify_one();
+        };
 
     enqueueFileTransfer(request,
         {[_state](std::future<FileTransferResult> fut) {
-            auto state(_state->lock());
-            state->quit = true;
-            try {
-                fut.get();
-            } catch (...) {
-                state->exc = std::current_exception();
-            }
-            state->avail.notify_one();
-            state->request.notify_one();
-        }});
+                auto state(_state->lock());
+                state->quit = true;
+                try {
+                    fut.get();
+                } catch (...) {
+                    state->exc = std::current_exception();
+                }
+                state->avail.notify_one();
+                state->request.notify_one();
+            }});
 
     while (true) {
         checkInterrupt();

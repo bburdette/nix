@@ -90,14 +90,14 @@ public:
     {
         state_.lock()->active = isTTY;
         updateThread = std::thread([&]() {
-            auto state(state_.lock());
-            while (state->active) {
-                if (!state->haveUpdate)
-                    state.wait(updateCV);
-                draw(*state);
-                state.wait_for(quitCV, std::chrono::milliseconds(50));
-            }
-        });
+                auto state(state_.lock());
+                while (state->active) {
+                    if (!state->haveUpdate)
+                        state.wait(updateCV);
+                    draw(*state);
+                    state.wait_for(quitCV, std::chrono::milliseconds(50));
+                }
+            });
     }
 
     ~ProgressBar()
@@ -372,50 +372,50 @@ public:
         std::string res;
 
         auto renderActivity = [&](ActivityType type, const std::string & itemFmt, const std::string & numberFmt = "%d", double unit = 1) {
-            auto & act = state.activitiesByType[type];
-            uint64_t done = act.done, expected = act.done, running = 0, failed = act.failed;
-            for (auto & j : act.its) {
-                done += j.second->done;
-                expected += j.second->expected;
-                running += j.second->running;
-                failed += j.second->failed;
-            }
+                auto & act = state.activitiesByType[type];
+                uint64_t done = act.done, expected = act.done, running = 0, failed = act.failed;
+                for (auto & j : act.its) {
+                    done += j.second->done;
+                    expected += j.second->expected;
+                    running += j.second->running;
+                    failed += j.second->failed;
+                }
 
-            expected = std::max(expected, act.expected);
+                expected = std::max(expected, act.expected);
 
-            std::string s;
+                std::string s;
 
-            if (running || done || expected || failed) {
-                if (running)
-                    if (expected != 0)
-                        s = fmt(ANSI_BLUE + numberFmt + ANSI_NORMAL "/" ANSI_GREEN + numberFmt + ANSI_NORMAL "/" + numberFmt,
-                            running / unit, done / unit, expected / unit);
+                if (running || done || expected || failed) {
+                    if (running)
+                        if (expected != 0)
+                            s = fmt(ANSI_BLUE + numberFmt + ANSI_NORMAL "/" ANSI_GREEN + numberFmt + ANSI_NORMAL "/" + numberFmt,
+                                running / unit, done / unit, expected / unit);
+                        else
+                            s = fmt(ANSI_BLUE + numberFmt + ANSI_NORMAL "/" ANSI_GREEN + numberFmt + ANSI_NORMAL,
+                                running / unit, done / unit);
+                    else if (expected != done)
+                        if (expected != 0)
+                            s = fmt(ANSI_GREEN + numberFmt + ANSI_NORMAL "/" + numberFmt,
+                                done / unit, expected / unit);
+                        else
+                            s = fmt(ANSI_GREEN + numberFmt + ANSI_NORMAL, done / unit);
                     else
-                        s = fmt(ANSI_BLUE + numberFmt + ANSI_NORMAL "/" ANSI_GREEN + numberFmt + ANSI_NORMAL,
-                            running / unit, done / unit);
-                else if (expected != done)
-                    if (expected != 0)
-                        s = fmt(ANSI_GREEN + numberFmt + ANSI_NORMAL "/" + numberFmt,
-                            done / unit, expected / unit);
-                    else
-                        s = fmt(ANSI_GREEN + numberFmt + ANSI_NORMAL, done / unit);
-                else
-                    s = fmt(done ? ANSI_GREEN + numberFmt + ANSI_NORMAL : numberFmt, done / unit);
-                s = fmt(itemFmt, s);
+                        s = fmt(done ? ANSI_GREEN + numberFmt + ANSI_NORMAL : numberFmt, done / unit);
+                    s = fmt(itemFmt, s);
 
-                if (failed)
-                    s += fmt(" (" ANSI_RED "%d failed" ANSI_NORMAL ")", failed / unit);
-            }
+                    if (failed)
+                        s += fmt(" (" ANSI_RED "%d failed" ANSI_NORMAL ")", failed / unit);
+                }
 
-            return s;
-        };
+                return s;
+            };
 
         auto showActivity = [&](ActivityType type, const std::string & itemFmt, const std::string & numberFmt = "%d", double unit = 1) {
-            auto s = renderActivity(type, itemFmt, numberFmt, unit);
-            if (s.empty()) return;
-            if (!res.empty()) res += ", ";
-            res += s;
-        };
+                auto s = renderActivity(type, itemFmt, numberFmt, unit);
+                if (s.empty()) return;
+                if (!res.empty()) res += ", ";
+                res += s;
+            };
 
         showActivity(actBuilds, "%s built");
 
@@ -473,7 +473,7 @@ Logger * makeProgressBar(bool printBuildLogs)
     return new ProgressBar(
         printBuildLogs,
         isatty(STDERR_FILENO) && getEnv("TERM").value_or("dumb") != "dumb"
-    );
+        );
 }
 
 void startProgressBar(bool printBuildLogs)

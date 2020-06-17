@@ -132,7 +132,7 @@ Path canonPath(const Path & path, bool resolveSymlinks)
 
         /* If `..', delete the last component. */
         else if (*i == '.' && i + 1 < end && i[1] == '.' &&
-            (i + 2 == end || i[2] == '/'))
+                 (i + 2 == end || i[2] == '/'))
         {
             if (!s.empty()) s.erase(s.rfind('/'));
             i += 2;
@@ -192,9 +192,9 @@ std::string_view baseNameOf(std::string_view path)
 bool isInDir(const Path & path, const Path & dir)
 {
     return path[0] == '/'
-        && string(path, 0, dir.size()) == dir
-        && path.size() >= dir.size() + 2
-        && path[dir.size()] == '/';
+           && string(path, 0, dir.size()) == dir
+           && path.size() >= dir.size() + 2
+           && path[dir.size()] == '/';
 }
 
 
@@ -266,7 +266,7 @@ DirEntries readDirectory(DIR *dir, const Path & path)
 #else
             DT_UNKNOWN
 #endif
-        );
+            );
     }
     if (errno) throw SysError("reading directory '%1%'", path);
 
@@ -512,18 +512,18 @@ std::string getUserName()
 
 
 static Lazy<Path> getHome2([]() {
-    auto homeDir = getEnv("HOME");
-    if (!homeDir) {
-        std::vector<char> buf(16384);
-        struct passwd pwbuf;
-        struct passwd * pw;
-        if (getpwuid_r(geteuid(), &pwbuf, buf.data(), buf.size(), &pw) != 0
-            || !pw || !pw->pw_dir || !pw->pw_dir[0])
-            throw Error("cannot determine user's home directory");
-        homeDir = pw->pw_dir;
-    }
-    return *homeDir;
-});
+        auto homeDir = getEnv("HOME");
+        if (!homeDir) {
+            std::vector<char> buf(16384);
+            struct passwd pwbuf;
+            struct passwd * pw;
+            if (getpwuid_r(geteuid(), &pwbuf, buf.data(), buf.size(), &pw) != 0
+                || !pw || !pw->pw_dir || !pw->pw_dir[0])
+                throw Error("cannot determine user's home directory");
+            homeDir = pw->pw_dir;
+        }
+        return *homeDir;
+    });
 
 Path getHome() { return getHome2(); }
 
@@ -658,11 +658,11 @@ void drainFD(int fd, Sink & sink, bool block)
     int saved;
 
     Finally finally([&]() {
-        if (!block) {
-            if (fcntl(fd, F_SETFL, saved) == -1)
-                throw SysError("making file descriptor blocking");
-        }
-    });
+            if (!block) {
+                if (fcntl(fd, F_SETFL, saved) == -1)
+                    throw SysError("making file descriptor blocking");
+            }
+        });
 
     if (!block) {
         saved = fcntl(fd, F_GETFL);
@@ -857,7 +857,7 @@ int Pid::kill()
 #if __FreeBSD__ || __APPLE__
         if (errno != EPERM || ::kill(pid, 0) != 0)
 #endif
-            logError(SysError("killing process %d", pid).info());
+        logError(SysError("killing process %d", pid).info());
     }
 
     return wait();
@@ -916,27 +916,27 @@ void killUser(uid_t uid)
 
     Pid pid = startProcess([&]() {
 
-        if (setuid(uid) == -1)
-            throw SysError("setting uid");
+            if (setuid(uid) == -1)
+                throw SysError("setting uid");
 
-        while (true) {
+            while (true) {
 #ifdef __APPLE__
-            /* OSX's kill syscall takes a third parameter that, among
-               other things, determines if kill(-1, signo) affects the
-               calling process. In the OSX libc, it's set to true,
-               which means "follow POSIX", which we don't want here
+                /* OSX's kill syscall takes a third parameter that, among
+                   other things, determines if kill(-1, signo) affects the
+                   calling process. In the OSX libc, it's set to true,
+                   which means "follow POSIX", which we don't want here
                  */
-            if (syscall(SYS_kill, -1, SIGKILL, false) == 0) break;
+                if (syscall(SYS_kill, -1, SIGKILL, false) == 0) break;
 #else
-            if (kill(-1, SIGKILL) == 0) break;
+                if (kill(-1, SIGKILL) == 0) break;
 #endif
-            if (errno == ESRCH) break; /* no more processes */
-            if (errno != EINTR)
-                throw SysError("cannot kill processes for uid '%1%'", uid);
-        }
+                if (errno == ESRCH) break; /* no more processes */
+                if (errno != EINTR)
+                    throw SysError("cannot kill processes for uid '%1%'", uid);
+            }
 
-        _exit(0);
-    }, options);
+            _exit(0);
+        }, options);
 
     int status = pid.wait();
     if (status != 0)
@@ -971,25 +971,25 @@ static pid_t doFork(bool allowVfork, std::function<void()> fun)
 pid_t startProcess(std::function<void()> fun, const ProcessOptions & options)
 {
     auto wrapper = [&]() {
-        if (!options.allowVfork)
-            logger = makeSimpleLogger();
-        try {
-#if __linux__
-            if (options.dieWithParent && prctl(PR_SET_PDEATHSIG, SIGKILL) == -1)
-                throw SysError("setting death signal");
-#endif
-            restoreAffinity();
-            fun();
-        } catch (std::exception & e) {
+            if (!options.allowVfork)
+                logger = makeSimpleLogger();
             try {
-                std::cerr << options.errorPrefix << e.what() << "\n";
+#if __linux__
+                if (options.dieWithParent && prctl(PR_SET_PDEATHSIG, SIGKILL) == -1)
+                    throw SysError("setting death signal");
+#endif
+                restoreAffinity();
+                fun();
+            } catch (std::exception & e) {
+                try {
+                    std::cerr << options.errorPrefix << e.what() << "\n";
+                } catch (...) { }
             } catch (...) { }
-        } catch (...) { }
-        if (options.runExitHandlers)
-            exit(1);
-        else
-            _exit(1);
-    };
+            if (options.runExitHandlers)
+                exit(1);
+            else
+                _exit(1);
+        };
 
     pid_t pid = doFork(options.allowVfork, wrapper);
     if (pid == -1) throw SysError("unable to fork");
@@ -1067,38 +1067,38 @@ void runProgram2(const RunOptions & options)
 
     /* Fork. */
     Pid pid = startProcess([&]() {
-        if (options.environment)
-            replaceEnv(*options.environment);
-        if (options.standardOut && dup2(out.writeSide.get(), STDOUT_FILENO) == -1)
-            throw SysError("dupping stdout");
-        if (options.mergeStderrToStdout)
-            if (dup2(STDOUT_FILENO, STDERR_FILENO) == -1)
-                throw SysError("cannot dup stdout into stderr");
-        if (source && dup2(in.readSide.get(), STDIN_FILENO) == -1)
-            throw SysError("dupping stdin");
+            if (options.environment)
+                replaceEnv(*options.environment);
+            if (options.standardOut && dup2(out.writeSide.get(), STDOUT_FILENO) == -1)
+                throw SysError("dupping stdout");
+            if (options.mergeStderrToStdout)
+                if (dup2(STDOUT_FILENO, STDERR_FILENO) == -1)
+                    throw SysError("cannot dup stdout into stderr");
+            if (source && dup2(in.readSide.get(), STDIN_FILENO) == -1)
+                throw SysError("dupping stdin");
 
-        if (options.chdir && chdir((*options.chdir).c_str()) == -1)
-            throw SysError("chdir failed");
-        if (options.gid && setgid(*options.gid) == -1)
-            throw SysError("setgid failed");
-        /* Drop all other groups if we're setgid. */
-        if (options.gid && setgroups(0, 0) == -1)
-            throw SysError("setgroups failed");
-        if (options.uid && setuid(*options.uid) == -1)
-            throw SysError("setuid failed");
+            if (options.chdir && chdir((*options.chdir).c_str()) == -1)
+                throw SysError("chdir failed");
+            if (options.gid && setgid(*options.gid) == -1)
+                throw SysError("setgid failed");
+            /* Drop all other groups if we're setgid. */
+            if (options.gid && setgroups(0, 0) == -1)
+                throw SysError("setgroups failed");
+            if (options.uid && setuid(*options.uid) == -1)
+                throw SysError("setuid failed");
 
-        Strings args_(options.args);
-        args_.push_front(options.program);
+            Strings args_(options.args);
+            args_.push_front(options.program);
 
-        restoreSignals();
+            restoreSignals();
 
-        if (options.searchPath)
-            execvp(options.program.c_str(), stringsToCharPtrs(args_).data());
-        else
-            execv(options.program.c_str(), stringsToCharPtrs(args_).data());
+            if (options.searchPath)
+                execvp(options.program.c_str(), stringsToCharPtrs(args_).data());
+            else
+                execv(options.program.c_str(), stringsToCharPtrs(args_).data());
 
-        throw SysError("executing '%1%'", options.program);
-    }, processOptions);
+            throw SysError("executing '%1%'", options.program);
+        }, processOptions);
 
     out.writeSide = -1;
 
@@ -1107,31 +1107,31 @@ void runProgram2(const RunOptions & options)
     std::promise<void> promise;
 
     Finally doJoin([&]() {
-        if (writerThread.joinable())
-            writerThread.join();
-    });
+            if (writerThread.joinable())
+                writerThread.join();
+        });
 
 
     if (source) {
         in.readSide = -1;
         writerThread = std::thread([&]() {
-            try {
-                std::vector<unsigned char> buf(8 * 1024);
-                while (true) {
-                    size_t n;
-                    try {
-                        n = source->read(buf.data(), buf.size());
-                    } catch (EndOfFile &) {
-                        break;
+                try {
+                    std::vector<unsigned char> buf(8 * 1024);
+                    while (true) {
+                        size_t n;
+                        try {
+                            n = source->read(buf.data(), buf.size());
+                        } catch (EndOfFile &) {
+                            break;
+                        }
+                        writeFull(in.writeSide.get(), buf.data(), n);
                     }
-                    writeFull(in.writeSide.get(), buf.data(), n);
+                    promise.set_value();
+                } catch (...) {
+                    promise.set_exception(std::current_exception());
                 }
-                promise.set_value();
-            } catch (...) {
-                promise.set_exception(std::current_exception());
-            }
-            in.writeSide = -1;
-        });
+                in.writeSide = -1;
+            });
     }
 
     if (options.standardOut)
@@ -1306,7 +1306,7 @@ bool hasPrefix(std::string_view s, std::string_view prefix)
 bool hasSuffix(std::string_view s, std::string_view suffix)
 {
     return s.size() >= suffix.size()
-        && s.substr(s.size() - suffix.size()) == suffix;
+           && s.substr(s.size() - suffix.size()) == suffix;
 }
 
 

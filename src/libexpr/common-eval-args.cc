@@ -11,26 +11,26 @@ namespace nix {
 MixEvalArgs::MixEvalArgs()
 {
     addFlag({
-        .longName = "arg",
-        .description = "argument to be passed to Nix functions",
-        .labels = {"name", "expr"},
-        .handler = {[&](std::string name, std::string expr) { autoArgs[name] = 'E' + expr; }}
-    });
+            .longName = "arg",
+            .description = "argument to be passed to Nix functions",
+            .labels = {"name", "expr"},
+            .handler = {[&](std::string name, std::string expr) { autoArgs[name] = 'E' + expr; }}
+        });
 
     addFlag({
-        .longName = "argstr",
-        .description = "string-valued argument to be passed to Nix functions",
-        .labels = {"name", "string"},
-        .handler = {[&](std::string name, std::string s) { autoArgs[name] = 'S' + s; }},
-    });
+            .longName = "argstr",
+            .description = "string-valued argument to be passed to Nix functions",
+            .labels = {"name", "string"},
+            .handler = {[&](std::string name, std::string s) { autoArgs[name] = 'S' + s; }},
+        });
 
     addFlag({
-        .longName = "include",
-        .shortName = 'I',
-        .description = "add a path to the list of locations used to look up <...> file names",
-        .labels = {"path"},
-        .handler = {[&](std::string s) { searchPath.push_back(s); }}
-    });
+            .longName = "include",
+            .shortName = 'I',
+            .description = "add a path to the list of locations used to look up <...> file names",
+            .labels = {"path"},
+            .handler = {[&](std::string s) { searchPath.push_back(s); }}
+        });
 }
 
 Bindings * MixEvalArgs::getAutoArgs(EvalState & state)

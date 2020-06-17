@@ -87,7 +87,7 @@ namespace std {
 template<> struct hash<nix::StorePath> {
     std::size_t operator()(const nix::StorePath & path) const noexcept
     {
-        return * (std::size_t *) path.to_string().data();
+        return *(std::size_t *) path.to_string().data();
     }
 };
 

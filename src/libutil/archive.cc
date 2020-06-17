@@ -21,12 +21,12 @@ struct ArchiveSettings : Config
 {
     Setting<bool> useCaseHack{this,
         #if __APPLE__
-            true,
+                              true,
         #else
-            false,
+                              false,
         #endif
-        "use-case-hack",
-        "Whether to enable a Darwin-specific hack for dealing with file name collisions."};
+                              "use-case-hack",
+                              "Whether to enable a Darwin-specific hack for dealing with file name collisions."};
 };
 
 static ArchiveSettings archiveSettings;
@@ -95,8 +95,8 @@ static void dump(const Path & path, Sink & sink, PathFilter & filter)
                 }
                 if (unhacked.find(name) != unhacked.end())
                     throw Error("file name collision in between '%1%' and '%2%'",
-                       (path + "/" + unhacked[name]),
-                       (path + "/" + i.name));
+                        (path + "/" + unhacked[name]),
+                        (path + "/" + i.name));
                 unhacked[name] = i.name;
             } else
                 unhacked[i.name] = i.name;
@@ -367,10 +367,10 @@ void copyNAR(Source & source, Sink & sink)
     ParseSink parseSink; /* null sink; just parse the NAR */
 
     LambdaSource wrapper([&](unsigned char * data, size_t len) {
-        auto n = source.read(data, len);
-        sink(data, n);
-        return n;
-    });
+            auto n = source.read(data, len);
+            sink(data, n);
+            return n;
+        });
 
     parseDump(parseSink, wrapper);
 }
@@ -379,8 +379,8 @@ void copyNAR(Source & source, Sink & sink)
 void copyPath(const Path & from, const Path & to)
 {
     auto source = sinkToSource([&](Sink & sink) {
-        dumpPath(from, sink);
-    });
+            dumpPath(from, sink);
+        });
     restorePath(to, *source);
 }
 

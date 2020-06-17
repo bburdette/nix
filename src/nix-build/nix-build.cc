@@ -302,7 +302,7 @@ static void _main(int argc, char * * argv)
                     /* If we're in a #! script, interpret filenames
                        relative to the script. */
                     exprs.push_back(state->parseExprFromFile(resolveExprPath(state->checkSourcePath(lookupFileArg(*state,
-                                        inShebang && !packages ? absPath(i, absPath(dirOf(script))) : i)))));
+                        inShebang && !packages ? absPath(i, absPath(dirOf(script))) : i)))));
             }
         }
 
@@ -380,7 +380,7 @@ static void _main(int argc, char * * argv)
         // Build or fetch all dependencies of the derivation.
         for (const auto & input : drv.inputDrvs)
             if (std::all_of(envExclude.cbegin(), envExclude.cend(),
-                    [&](const string & exclude) { return !std::regex_search(store->printStorePath(input.first), std::regex(exclude)); }))
+                [&](const string & exclude) { return !std::regex_search(store->printStorePath(input.first), std::regex(exclude)); }))
                 pathsToBuild.push_back({input.first, input.second});
         for (const auto & src : drv.inputSrcs)
             pathsToBuild.push_back({src});
@@ -432,33 +432,33 @@ static void _main(int argc, char * * argv)
            lose the current $PATH directories. */
         auto rcfile = (Path) tmpDir + "/rc";
         writeFile(rcfile, fmt(
-                R"(_nix_shell_clean_tmpdir() { rm -rf %1%; }; )"s +
-                (keepTmp ?
-                    "trap _nix_shell_clean_tmpdir EXIT; "
-                    "exitHooks+=(_nix_shell_clean_tmpdir); "
-                    "failureHooks+=(_nix_shell_clean_tmpdir); ":
-                    "_nix_shell_clean_tmpdir; ") +
-                (pure ? "" : "[ -n \"$PS1\" ] && [ -e ~/.bashrc ] && source ~/.bashrc;") +
-                "%2%"
-                "dontAddDisableDepTrack=1; "
-                "[ -e $stdenv/setup ] && source $stdenv/setup; "
-                "%3%"
-                "PATH=%4%:\"$PATH\"; "
-                "SHELL=%5%; "
-                "set +e; "
-                R"s([ -n "$PS1" ] && PS1='\n\[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] '; )s"
-                "if [ \"$(type -t runHook)\" = function ]; then runHook shellHook; fi; "
-                "unset NIX_ENFORCE_PURITY; "
-                "shopt -u nullglob; "
-                "unset TZ; %6%"
-                "%7%",
-                shellEscape(tmpDir),
-                (pure ? "" : "p=$PATH; "),
-                (pure ? "" : "PATH=$PATH:$p; unset p; "),
-                shellEscape(dirOf(*shell)),
-                shellEscape(*shell),
-                (getenv("TZ") ? (string("export TZ=") + shellEscape(getenv("TZ")) + "; ") : ""),
-                envCommand));
+            R"(_nix_shell_clean_tmpdir() { rm -rf %1%; }; )"s +
+            (keepTmp ?
+             "trap _nix_shell_clean_tmpdir EXIT; "
+             "exitHooks+=(_nix_shell_clean_tmpdir); "
+             "failureHooks+=(_nix_shell_clean_tmpdir); " :
+             "_nix_shell_clean_tmpdir; ") +
+            (pure ? "" : "[ -n \"$PS1\" ] && [ -e ~/.bashrc ] && source ~/.bashrc;") +
+            "%2%"
+            "dontAddDisableDepTrack=1; "
+            "[ -e $stdenv/setup ] && source $stdenv/setup; "
+            "%3%"
+            "PATH=%4%:\"$PATH\"; "
+            "SHELL=%5%; "
+            "set +e; "
+            R"s([ -n "$PS1" ] && PS1='\n\[\033[1;32m\][nix-shell:\w]\$\[\033[0m\] '; )s"
+            "if [ \"$(type -t runHook)\" = function ]; then runHook shellHook; fi; "
+            "unset NIX_ENFORCE_PURITY; "
+            "shopt -u nullglob; "
+            "unset TZ; %6%"
+            "%7%",
+            shellEscape(tmpDir),
+            (pure ? "" : "p=$PATH; "),
+            (pure ? "" : "PATH=$PATH:$p; unset p; "),
+            shellEscape(dirOf(*shell)),
+            shellEscape(*shell),
+            (getenv("TZ") ? (string("export TZ=") + shellEscape(getenv("TZ")) + "; ") : ""),
+            envCommand));
 
         Strings envStrs;
         for (auto & i : env)

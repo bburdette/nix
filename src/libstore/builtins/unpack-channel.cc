@@ -6,10 +6,10 @@ namespace nix {
 void builtinUnpackChannel(const BasicDerivation & drv)
 {
     auto getAttr = [&](const string & name) {
-        auto i = drv.env.find(name);
-        if (i == drv.env.end()) throw Error("attribute '%s' missing", name);
-        return i->second;
-    };
+            auto i = drv.env.find(name);
+            if (i == drv.env.end()) throw Error("attribute '%s' missing", name);
+            return i->second;
+        };
 
     Path out = getAttr("out");
     auto channelName = getAttr("channelName");

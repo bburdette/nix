@@ -21,7 +21,7 @@ namespace nix {
 
    Here, "data" is automatically unlocked when "data_" goes out of
    scope.
-*/
+ */
 
 template<class T, class M = std::mutex>
 class Sync

@@ -28,7 +28,7 @@ namespace nix {
 SQLite::SQLite(const Path & path, bool create)
 {
     if (sqlite3_open_v2(path.c_str(), &db,
-            SQLITE_OPEN_READWRITE | (create ? SQLITE_OPEN_CREATE : 0), 0) != SQLITE_OK)
+        SQLITE_OPEN_READWRITE | (create ? SQLITE_OPEN_CREATE : 0), 0) != SQLITE_OK)
         throw Error("cannot open SQLite database '%s'", path);
 
     if (sqlite3_busy_timeout(db, 60 * 60 * 1000) != SQLITE_OK)
@@ -56,9 +56,9 @@ void SQLite::isCache()
 void SQLite::exec(const std::string & stmt)
 {
     retrySQLite<void>([&]() {
-        if (sqlite3_exec(db, stmt.c_str(), 0, 0, 0) != SQLITE_OK)
-            throwSQLiteError(db, format("executing SQLite statement '%s'") % stmt);
-    });
+            if (sqlite3_exec(db, stmt.c_str(), 0, 0, 0) != SQLITE_OK)
+                throwSQLiteError(db, format("executing SQLite statement '%s'") % stmt);
+        });
 }
 
 void SQLiteStmt::create(sqlite3 * db, const string & sql)
@@ -205,9 +205,9 @@ void handleSQLiteBusy(const SQLiteBusy & e)
     if (now > lastWarned + 10) {
         lastWarned = now;
         logWarning({
-            .name = "Sqlite busy",
-            .hint = hintfmt(e.what())
-        });
+                .name = "Sqlite busy",
+                .hint = hintfmt(e.what())
+            });
     }
 
     /* Sleep for a while since retrying the transaction right away

@@ -23,9 +23,9 @@ static void createLinks(State & state, const Path & srcDir, const Path & dstDir,
     } catch (SysError & e) {
         if (e.errNo == ENOTDIR) {
             logWarning({
-                .name = "Create links - directory",
-                .hint = hintfmt("not including '%s' in the user environment because it's not a directory", srcDir)
-            });
+                    .name = "Create links - directory",
+                    .hint = hintfmt("not including '%s' in the user environment because it's not a directory", srcDir)
+                });
             return;
         }
         throw;
@@ -45,9 +45,9 @@ static void createLinks(State & state, const Path & srcDir, const Path & dstDir,
         } catch (SysError & e) {
             if (e.errNo == ENOENT || e.errNo == ENOTDIR) {
                 logWarning({
-                    .name = "Create links - skipping symlink",
-                    .hint = hintfmt("skipping dangling symlink '%s'", dstFile)
-                });
+                        .name = "Create links - skipping symlink",
+                        .hint = hintfmt("skipping dangling symlink '%s'", dstFile)
+                    });
                 continue;
             }
             throw;
@@ -97,11 +97,11 @@ static void createLinks(State & state, const Path & srcDir, const Path & dstDir,
                     auto prevPriority = state.priorities[dstFile];
                     if (prevPriority == priority)
                         throw Error(
-                                "packages '%1%' and '%2%' have the same priority %3%; "
-                                "use 'nix-env --set-flag priority NUMBER INSTALLED_PKGNAME' "
-                                "to change the priority of one of the conflicting packages"
-                                " (0 being the highest priority)",
-                                srcFile, readLink(dstFile), priority);
+                            "packages '%1%' and '%2%' have the same priority %3%; "
+                            "use 'nix-env --set-flag priority NUMBER INSTALLED_PKGNAME' "
+                            "to change the priority of one of the conflicting packages"
+                            " (0 being the highest priority)",
+                            srcFile, readLink(dstFile), priority);
                     if (prevPriority < priority)
                         continue;
                     if (unlink(dstFile.c_str()) == -1)
@@ -125,26 +125,26 @@ void buildProfile(const Path & out, Packages && pkgs)
     std::set<Path> done, postponed;
 
     auto addPkg = [&](const Path & pkgDir, int priority) {
-        if (!done.insert(pkgDir).second) return;
-        createLinks(state, pkgDir, out, priority);
+            if (!done.insert(pkgDir).second) return;
+            createLinks(state, pkgDir, out, priority);
 
-        try {
-            for (const auto & p : tokenizeString<std::vector<string>>(
+            try {
+                for (const auto & p : tokenizeString<std::vector<string>>(
                     readFile(pkgDir + "/nix-support/propagated-user-env-packages"), " \n"))
-                if (!done.count(p))
-                    postponed.insert(p);
-        } catch (SysError & e) {
-            if (e.errNo != ENOENT && e.errNo != ENOTDIR) throw;
-        }
-    };
+                    if (!done.count(p))
+                        postponed.insert(p);
+            } catch (SysError & e) {
+                if (e.errNo != ENOENT && e.errNo != ENOTDIR) throw;
+            }
+        };
 
     /* Symlink to the packages that have been installed explicitly by the
      * user. Process in priority order to reduce unnecessary
      * symlink/unlink steps.
      */
     std::sort(pkgs.begin(), pkgs.end(), [](const Package & a, const Package & b) {
-        return a.priority < b.priority || (a.priority == b.priority && a.path < b.path);
-    });
+            return a.priority < b.priority || (a.priority == b.priority && a.path < b.path);
+        });
     for (const auto & pkg : pkgs)
         if (pkg.active)
             addPkg(pkg.path, pkg.priority);
@@ -168,10 +168,10 @@ void buildProfile(const Path & out, Packages && pkgs)
 void builtinBuildenv(const BasicDerivation & drv)
 {
     auto getAttr = [&](const string & name) {
-        auto i = drv.env.find(name);
-        if (i == drv.env.end()) throw Error("attribute '%s' missing", name);
-        return i->second;
-    };
+            auto i = drv.env.find(name);
+            if (i == drv.env.end()) throw Error("attribute '%s' missing", name);
+            return i->second;
+        };
 
     Path out = getAttr("out");
     createDirs(out);

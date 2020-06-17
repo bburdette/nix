@@ -25,20 +25,20 @@ namespace nix {
 
 /*
 
-This file defines two main structs/classes used in nix error handling.
+   This file defines two main structs/classes used in nix error handling.
 
-ErrorInfo provides a standard payload of error information, with conversion to string
-happening in the logger rather than at the call site.
+   ErrorInfo provides a standard payload of error information, with conversion to string
+   happening in the logger rather than at the call site.
 
-BaseError is the ancestor of nix specific exceptions (and Interrupted), and contains
-an ErrorInfo.
+   BaseError is the ancestor of nix specific exceptions (and Interrupted), and contains
+   an ErrorInfo.
 
-ErrorInfo structs are sent to the logger as part of an exception, or directly with the
-logError or logWarning macros.
+   ErrorInfo structs are sent to the logger as part of an exception, or directly with the
+   logError or logWarning macros.
 
-See the error-demo.cc program for usage examples.
+   See the error-demo.cc program for usage examples.
 
-*/
+ */
 
 typedef enum {
     lvlError = 0,
@@ -113,23 +113,23 @@ public:
 
     template<typename... Args>
     BaseError(unsigned int status, const Args & ... args)
-        : err { .level = lvlError,
-                .hint = hintfmt(args...)
-              }
+        : err {.level = lvlError,
+            .hint = hintfmt(args...)
+            }
         , status(status)
     { }
 
     template<typename... Args>
     BaseError(const std::string & fs, const Args & ... args)
-        : err { .level = lvlError,
-                .hint = hintfmt(fs, args...)
-              }
+        : err {.level = lvlError,
+            .hint = hintfmt(fs, args...)
+            }
     { }
 
     BaseError(hintformat hint)
-        : err { .level = lvlError,
-                .hint = hint
-              }
+        : err {.level = lvlError,
+            .hint = hint
+            }
     { }
 
     BaseError(ErrorInfo && e)
@@ -173,7 +173,7 @@ public:
 
     template<typename... Args>
     SysError(const Args & ... args)
-      :Error("")
+        : Error("")
     {
         errNo = errno;
         auto hf = hintfmt(args...);

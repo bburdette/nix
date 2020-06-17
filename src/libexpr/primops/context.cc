@@ -63,7 +63,7 @@ static RegisterPrimOp r3("__unsafeDiscardOutputDependency", 1, prim_unsafeDiscar
               .outPath of some derivation). Empty list if missing.
    Note that for a given path any combination of the above attributes
    may be present.
-*/
+ */
 static void prim_getContext(EvalState & state, const Pos & pos, Value * * args, Value & v)
 {
     struct ContextInfo {
@@ -134,7 +134,7 @@ static RegisterPrimOp r4("__getContext", 1, prim_getContext);
 
    See the commentary above unsafeGetContext for details of the
    context representation.
-*/
+ */
 static void prim_appendContext(EvalState & state, const Pos & pos, Value * * args, Value & v)
 {
     PathSet context;
@@ -147,9 +147,9 @@ static void prim_appendContext(EvalState & state, const Pos & pos, Value * * arg
     for (auto & i : *args[1]->attrs) {
         if (!state.store->isStorePath(i.name))
             throw EvalError({
-                .hint = hintfmt("Context key '%s' is not a store path", i.name),
-                .nixCode = NixCode { .errPos = *i.pos }
-            });
+                    .hint = hintfmt("Context key '%s' is not a store path", i.name),
+                    .nixCode = NixCode { .errPos = *i.pos }
+                });
         if (!settings.readOnlyMode)
             state.store->ensurePath(state.store->parseStorePath(i.name));
         state.forceAttrs(*i.value, *i.pos);
@@ -164,9 +164,9 @@ static void prim_appendContext(EvalState & state, const Pos & pos, Value * * arg
             if (state.forceBool(*iter->value, *iter->pos)) {
                 if (!isDerivation(i.name)) {
                     throw EvalError({
-                        .hint = hintfmt("Tried to add all-outputs context of %s, which is not a derivation, to a string", i.name),
-                        .nixCode = NixCode { .errPos = *i.pos }
-                    });
+                            .hint = hintfmt("Tried to add all-outputs context of %s, which is not a derivation, to a string", i.name),
+                            .nixCode = NixCode { .errPos = *i.pos }
+                        });
                 }
                 context.insert("=" + string(i.name));
             }
@@ -177,9 +177,9 @@ static void prim_appendContext(EvalState & state, const Pos & pos, Value * * arg
             state.forceList(*iter->value, *iter->pos);
             if (iter->value->listSize() && !isDerivation(i.name)) {
                 throw EvalError({
-                    .hint = hintfmt("Tried to add derivation output context of %s, which is not a derivation, to a string", i.name),
-                    .nixCode = NixCode { .errPos = *i.pos }
-                });
+                        .hint = hintfmt("Tried to add derivation output context of %s, which is not a derivation, to a string", i.name),
+                        .nixCode = NixCode { .errPos = *i.pos }
+                    });
             }
             for (unsigned int n = 0; n < iter->value->listSize(); ++n) {
                 auto name = state.forceStringNoCtx(*iter->value->listElems()[n], *iter->pos);

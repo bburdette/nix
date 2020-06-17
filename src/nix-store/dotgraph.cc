@@ -20,8 +20,8 @@ static string nextColour()
 {
     static int n = 0;
     static string colours[] =
-        { "black", "red", "green", "blue"
-        , "magenta", "burlywood" };
+    { "black", "red", "green", "blue"
+      , "magenta", "burlywood" };
     return colours[n++ % (sizeof(colours) / sizeof(string))];
 }
 

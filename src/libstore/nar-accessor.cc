@@ -115,24 +115,24 @@ struct NarAccessor : public FSAccessor
         std::function<void(NarMember &, json &)> recurse;
 
         recurse = [&](NarMember & member, json & v) {
-            std::string type = v["type"];
+                std::string type = v["type"];
 
-            if (type == "directory") {
-                member.type = FSAccessor::Type::tDirectory;
-                for (auto i = v["entries"].begin(); i != v["entries"].end(); ++i) {
-                    std::string name = i.key();
-                    recurse(member.children[name], i.value());
-                }
-            } else if (type == "regular") {
-                member.type = FSAccessor::Type::tRegular;
-                member.size = v["size"];
-                member.isExecutable = v.value("executable", false);
-                member.start = v["narOffset"];
-            } else if (type == "symlink") {
-                member.type = FSAccessor::Type::tSymlink;
-                member.target = v.value("target", "");
-            } else return;
-        };
+                if (type == "directory") {
+                    member.type = FSAccessor::Type::tDirectory;
+                    for (auto i = v["entries"].begin(); i != v["entries"].end(); ++i) {
+                        std::string name = i.key();
+                        recurse(member.children[name], i.value());
+                    }
+                } else if (type == "regular") {
+                    member.type = FSAccessor::Type::tRegular;
+                    member.size = v["size"];
+                    member.isExecutable = v.value("executable", false);
+                    member.start = v["narOffset"];
+                } else if (type == "symlink") {
+                    member.type = FSAccessor::Type::tSymlink;
+                    member.target = v.value("target", "");
+                } else return;
+            };
 
         json v = json::parse(listing);
         recurse(root, v);
@@ -233,33 +233,33 @@ void listNar(JSONPlaceholder & res, ref<FSAccessor> accessor,
     auto obj = res.object();
 
     switch (st.type) {
-    case FSAccessor::Type::tRegular:
-        obj.attr("type", "regular");
-        obj.attr("size", st.fileSize);
-        if (st.isExecutable)
-            obj.attr("executable", true);
-        if (st.narOffset)
-            obj.attr("narOffset", st.narOffset);
-        break;
-    case FSAccessor::Type::tDirectory:
-        obj.attr("type", "directory");
-        {
-            auto res2 = obj.object("entries");
-            for (auto & name : accessor->readDirectory(path)) {
-                if (recurse) {
-                    auto res3 = res2.placeholder(name);
-                    listNar(res3, accessor, path + "/" + name, true);
-                } else
-                    res2.object(name);
+        case FSAccessor::Type::tRegular:
+            obj.attr("type", "regular");
+            obj.attr("size", st.fileSize);
+            if (st.isExecutable)
+                obj.attr("executable", true);
+            if (st.narOffset)
+                obj.attr("narOffset", st.narOffset);
+            break;
+        case FSAccessor::Type::tDirectory:
+            obj.attr("type", "directory");
+            {
+                auto res2 = obj.object("entries");
+                for (auto & name : accessor->readDirectory(path)) {
+                    if (recurse) {
+                        auto res3 = res2.placeholder(name);
+                        listNar(res3, accessor, path + "/" + name, true);
+                    } else
+                        res2.object(name);
+                }
             }
-        }
-        break;
-    case FSAccessor::Type::tSymlink:
-        obj.attr("type", "symlink");
-        obj.attr("target", accessor->readLink(path));
-        break;
-    default:
-        throw Error("path '%s' does not exist in NAR", path);
+            break;
+        case FSAccessor::Type::tSymlink:
+            obj.attr("type", "symlink");
+            obj.attr("target", accessor->readLink(path));
+            break;
+        default:
+            throw Error("path '%s' does not exist in NAR", path);
     }
 }
 

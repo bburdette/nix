@@ -100,26 +100,26 @@ public:
 
         /* Periodically purge expired entries from the database. */
         retrySQLite<void>([&]() {
-            auto now = time(0);
+                auto now = time(0);
 
-            SQLiteStmt queryLastPurge(state->db, "select value from LastPurge");
-            auto queryLastPurge_(queryLastPurge.use());
+                SQLiteStmt queryLastPurge(state->db, "select value from LastPurge");
+                auto queryLastPurge_(queryLastPurge.use());
 
-            if (!queryLastPurge_.next() || queryLastPurge_.getInt(0) < now - purgeInterval) {
-                SQLiteStmt(state->db,
-                    "delete from NARs where ((present = 0 and timestamp < ?) or (present = 1 and timestamp < ?))")
+                if (!queryLastPurge_.next() || queryLastPurge_.getInt(0) < now - purgeInterval) {
+                    SQLiteStmt(state->db,
+                        "delete from NARs where ((present = 0 and timestamp < ?) or (present = 1 and timestamp < ?))")
                     .use()
-                    (now - settings.ttlNegativeNarInfoCache)
-                    (now - settings.ttlPositiveNarInfoCache)
+                        (now - settings.ttlNegativeNarInfoCache)
+                        (now - settings.ttlPositiveNarInfoCache)
                     .exec();
 
-                debug("deleted %d entries from the NAR info disk cache", sqlite3_changes(state->db));
+                    debug("deleted %d entries from the NAR info disk cache", sqlite3_changes(state->db));
 
-                SQLiteStmt(state->db,
-                    "insert or replace into LastPurge(dummy, value) values ('', ?)")
+                    SQLiteStmt(state->db,
+                        "insert or replace into LastPurge(dummy, value) values ('', ?)")
                     .use()(now).exec();
-            }
-        });
+                }
+            });
     }
 
     Cache & getCache(State & state, const std::string & uri)
@@ -132,37 +132,37 @@ public:
     void createCache(const std::string & uri, const Path & storeDir, bool wantMassQuery, int priority) override
     {
         retrySQLite<void>([&]() {
-            auto state(_state.lock());
+                auto state(_state.lock());
 
-            // FIXME: race
+                // FIXME: race
 
-            state->insertCache.use()(uri)(time(0))(storeDir)(wantMassQuery)(priority).exec();
-            assert(sqlite3_changes(state->db) == 1);
-            state->caches[uri] = Cache{(int) sqlite3_last_insert_rowid(state->db), storeDir, wantMassQuery, priority};
-        });
+                state->insertCache.use()(uri)(time(0))(storeDir)(wantMassQuery)(priority).exec();
+                assert(sqlite3_changes(state->db) == 1);
+                state->caches[uri] = Cache{(int) sqlite3_last_insert_rowid(state->db), storeDir, wantMassQuery, priority};
+            });
     }
 
     std::optional<CacheInfo> cacheExists(const std::string & uri) override
     {
         return retrySQLite<std::optional<CacheInfo>>([&]() -> std::optional<CacheInfo> {
-            auto state(_state.lock());
+                auto state(_state.lock());
 
-            auto i = state->caches.find(uri);
-            if (i == state->caches.end()) {
-                auto queryCache(state->queryCache.use()(uri));
-                if (!queryCache.next())
-                    return std::nullopt;
-                state->caches.emplace(uri,
-                    Cache{(int) queryCache.getInt(0), queryCache.getStr(1), queryCache.getInt(2) != 0, (int) queryCache.getInt(3)});
-            }
+                auto i = state->caches.find(uri);
+                if (i == state->caches.end()) {
+                    auto queryCache(state->queryCache.use()(uri));
+                    if (!queryCache.next())
+                        return std::nullopt;
+                    state->caches.emplace(uri,
+                        Cache{(int) queryCache.getInt(0), queryCache.getStr(1), queryCache.getInt(2) != 0, (int) queryCache.getInt(3)});
+                }
 
-            auto & cache(getCache(*state, uri));
+                auto & cache(getCache(*state, uri));
 
-            return CacheInfo {
-                .wantMassQuery = cache.wantMassQuery,
-                .priority = cache.priority
-            };
-        });
+                return CacheInfo {
+                    .wantMassQuery = cache.wantMassQuery,
+                    .priority = cache.priority
+                };
+            });
     }
 
     std::pair<Outcome, std::shared_ptr<NarInfo>> lookupNarInfo(
@@ -170,43 +170,43 @@ public:
     {
         return retrySQLite<std::pair<Outcome, std::shared_ptr<NarInfo>>>(
             [&]() -> std::pair<Outcome, std::shared_ptr<NarInfo>> {
-            auto state(_state.lock());
+                auto state(_state.lock());
 
-            auto & cache(getCache(*state, uri));
+                auto & cache(getCache(*state, uri));
 
-            auto now = time(0);
+                auto now = time(0);
 
-            auto queryNAR(state->queryNAR.use()
-                (cache.id)
-                (hashPart)
-                (now - settings.ttlNegativeNarInfoCache)
-                (now - settings.ttlPositiveNarInfoCache));
+                auto queryNAR(state->queryNAR.use()
+                        (cache.id)
+                        (hashPart)
+                        (now - settings.ttlNegativeNarInfoCache)
+                        (now - settings.ttlPositiveNarInfoCache));
 
-            if (!queryNAR.next())
-                return {oUnknown, 0};
+                if (!queryNAR.next())
+                    return {oUnknown, 0};
 
-            if (!queryNAR.getInt(0))
-                return {oInvalid, 0};
+                if (!queryNAR.getInt(0))
+                    return {oInvalid, 0};
 
-            auto namePart = queryNAR.getStr(1);
-            auto narInfo = make_ref<NarInfo>(StorePath(hashPart + "-" + namePart));
-            narInfo->url = queryNAR.getStr(2);
-            narInfo->compression = queryNAR.getStr(3);
-            if (!queryNAR.isNull(4))
-                narInfo->fileHash = Hash(queryNAR.getStr(4));
-            narInfo->fileSize = queryNAR.getInt(5);
-            narInfo->narHash = Hash(queryNAR.getStr(6));
-            narInfo->narSize = queryNAR.getInt(7);
-            for (auto & r : tokenizeString<Strings>(queryNAR.getStr(8), " "))
-                narInfo->references.insert(StorePath(r));
-            if (!queryNAR.isNull(9))
-                narInfo->deriver = StorePath(queryNAR.getStr(9));
-            for (auto & sig : tokenizeString<Strings>(queryNAR.getStr(10), " "))
-                narInfo->sigs.insert(sig);
-            narInfo->ca = queryNAR.getStr(11);
+                auto namePart = queryNAR.getStr(1);
+                auto narInfo = make_ref<NarInfo>(StorePath(hashPart + "-" + namePart));
+                narInfo->url = queryNAR.getStr(2);
+                narInfo->compression = queryNAR.getStr(3);
+                if (!queryNAR.isNull(4))
+                    narInfo->fileHash = Hash(queryNAR.getStr(4));
+                narInfo->fileSize = queryNAR.getInt(5);
+                narInfo->narHash = Hash(queryNAR.getStr(6));
+                narInfo->narSize = queryNAR.getInt(7);
+                for (auto & r : tokenizeString<Strings>(queryNAR.getStr(8), " "))
+                    narInfo->references.insert(StorePath(r));
+                if (!queryNAR.isNull(9))
+                    narInfo->deriver = StorePath(queryNAR.getStr(9));
+                for (auto & sig : tokenizeString<Strings>(queryNAR.getStr(10), " "))
+                    narInfo->sigs.insert(sig);
+                narInfo->ca = queryNAR.getStr(11);
 
-            return {oValid, narInfo};
-        });
+                return {oValid, narInfo};
+            });
     }
 
     void upsertNarInfo(
@@ -214,39 +214,39 @@ public:
         std::shared_ptr<const ValidPathInfo> info) override
     {
         retrySQLite<void>([&]() {
-            auto state(_state.lock());
+                auto state(_state.lock());
 
-            auto & cache(getCache(*state, uri));
+                auto & cache(getCache(*state, uri));
 
-            if (info) {
+                if (info) {
 
-                auto narInfo = std::dynamic_pointer_cast<const NarInfo>(info);
+                    auto narInfo = std::dynamic_pointer_cast<const NarInfo>(info);
 
-                //assert(hashPart == storePathToHash(info->path));
+                    //assert(hashPart == storePathToHash(info->path));
 
-                state->insertNAR.use()
-                    (cache.id)
-                    (hashPart)
-                    (std::string(info->path.name()))
-                    (narInfo ? narInfo->url : "", narInfo != 0)
-                    (narInfo ? narInfo->compression : "", narInfo != 0)
-                    (narInfo && narInfo->fileHash ? narInfo->fileHash.to_string(Base32, true) : "", narInfo && narInfo->fileHash)
-                    (narInfo ? narInfo->fileSize : 0, narInfo != 0 && narInfo->fileSize)
-                    (info->narHash.to_string(Base32, true))
-                    (info->narSize)
-                    (concatStringsSep(" ", info->shortRefs()))
-                    (info->deriver ? std::string(info->deriver->to_string()) : "", (bool) info->deriver)
-                    (concatStringsSep(" ", info->sigs))
-                    (info->ca)
-                    (time(0)).exec();
+                    state->insertNAR.use()
+                        (cache.id)
+                        (hashPart)
+                        (std::string(info->path.name()))
+                        (narInfo ? narInfo->url : "", narInfo != 0)
+                        (narInfo ? narInfo->compression : "", narInfo != 0)
+                        (narInfo && narInfo->fileHash ? narInfo->fileHash.to_string(Base32, true) : "", narInfo && narInfo->fileHash)
+                        (narInfo ? narInfo->fileSize : 0, narInfo != 0 && narInfo->fileSize)
+                        (info->narHash.to_string(Base32, true))
+                        (info->narSize)
+                        (concatStringsSep(" ", info->shortRefs()))
+                        (info->deriver ? std::string(info->deriver->to_string()) : "", (bool) info->deriver)
+                        (concatStringsSep(" ", info->sigs))
+                        (info->ca)
+                        (time(0)).exec();
 
-            } else {
-                state->insertMissingNAR.use()
-                    (cache.id)
-                    (hashPart)
-                    (time(0)).exec();
-            }
-        });
+                } else {
+                    state->insertMissingNAR.use()
+                        (cache.id)
+                        (hashPart)
+                        (time(0)).exec();
+                }
+            });
     }
 };
 

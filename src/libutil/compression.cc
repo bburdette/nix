@@ -244,9 +244,9 @@ struct BrotliDecompressionSink : ChunkedCompressionSink
             checkInterrupt();
 
             if (!BrotliDecoderDecompressStream(state,
-                    &avail_in, &next_in,
-                    &avail_out, &next_out,
-                    nullptr))
+                &avail_in, &next_in,
+                &avail_out, &next_out,
+                nullptr))
                 throw CompressionError("error while decompressing brotli file");
 
             if (avail_out < sizeof(outbuf) || avail_in == 0) {
@@ -453,10 +453,10 @@ struct BrotliCompressionSink : ChunkedCompressionSink
             checkInterrupt();
 
             if (!BrotliEncoderCompressStream(state,
-                    data ? BROTLI_OPERATION_PROCESS : BROTLI_OPERATION_FINISH,
-                    &avail_in, &next_in,
-                    &avail_out, &next_out,
-                    nullptr))
+                data ? BROTLI_OPERATION_PROCESS : BROTLI_OPERATION_FINISH,
+                &avail_in, &next_in,
+                &avail_out, &next_out,
+                nullptr))
                 throw CompressionError("error while compressing brotli compression");
 
             if (avail_out < sizeof(outbuf) || avail_in == 0) {

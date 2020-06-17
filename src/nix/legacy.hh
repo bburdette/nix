@@ -6,7 +6,7 @@
 
 namespace nix {
 
-typedef std::function<void(int, char * *)> MainFunction;
+typedef std::function<void (int, char * *)> MainFunction;
 
 struct RegisterLegacyCommand
 {

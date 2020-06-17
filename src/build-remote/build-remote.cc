@@ -103,10 +103,10 @@ static int _main(int argc, char * * argv)
             drvPath = store->parseStorePath(readString(source));
             auto requiredFeatures = readStrings<std::set<std::string>>(source);
 
-             auto canBuildLocally = amWilling
-                 &&  (  neededSystem == settings.thisSystem
-                     || settings.extraPlatforms.get().count(neededSystem) > 0)
-                 &&  allSupportedLocally(requiredFeatures);
+            auto canBuildLocally = amWilling
+                &&  (  neededSystem == settings.thisSystem
+                       || settings.extraPlatforms.get().count(neededSystem) > 0)
+                &&  allSupportedLocally(requiredFeatures);
 
             /* Error ignored here, will be caught later */
             mkdir(currentLoad.c_str(), 0777);
@@ -124,8 +124,8 @@ static int _main(int argc, char * * argv)
                     debug("considering building on remote machine '%s'", m.storeUri);
 
                     if (m.enabled && std::find(m.systemTypes.begin(),
-                            m.systemTypes.end(),
-                            neededSystem) != m.systemTypes.end() &&
+                        m.systemTypes.end(),
+                        neededSystem) != m.systemTypes.end() &&
                         m.allSupported(requiredFeatures) &&
                         m.mandatoryMet(requiredFeatures)) {
                         rightType = true;

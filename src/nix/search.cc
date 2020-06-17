@@ -25,8 +25,8 @@ std::string hilite(const std::string & s, const std::smatch & m, std::string pos
         m.empty()
         ? s
         : std::string(m.prefix())
-          + ANSI_RED + std::string(m.str()) + postfix
-          + std::string(m.suffix());
+        + ANSI_RED + std::string(m.str()) + postfix
+        + std::string(m.suffix());
 }
 
 struct CmdSearch : SourceExprCommand, MixJSON

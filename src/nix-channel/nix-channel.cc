@@ -105,7 +105,7 @@ static void update(const StringSet & channelNames)
         bool unpacked = false;
         if (std::regex_search(filename, std::regex("\\.tar\\.(gz|bz2|xz)$"))) {
             runProgram(settings.nixBinDir + "/nix-build", false, { "--no-out-link", "--expr", "import <nix/unpack-channel.nix> "
-                        "{ name = \"" + cname + "\"; channelName = \"" + name + "\"; src = builtins.storePath \"" + filename + "\"; }" });
+                                                                   "{ name = \"" + cname + "\"; channelName = \"" + name + "\"; src = builtins.storePath \"" + filename + "\"; }" });
             unpacked = true;
         }
 
@@ -198,16 +198,16 @@ static int _main(int argc, char ** argv)
                 if (args.size() < 1 || args.size() > 2)
                     throw UsageError("'--add' requires one or two arguments");
                 {
-                auto url = args[0];
-                std::string name;
-                if (args.size() == 2) {
-                    name = args[1];
-                } else {
-                    name = baseNameOf(url);
-                    name = std::regex_replace(name, std::regex("-unstable$"), "");
-                    name = std::regex_replace(name, std::regex("-stable$"), "");
-                }
-                addChannel(url, name);
+                    auto url = args[0];
+                    std::string name;
+                    if (args.size() == 2) {
+                        name = args[1];
+                    } else {
+                        name = baseNameOf(url);
+                        name = std::regex_replace(name, std::regex("-unstable$"), "");
+                        name = std::regex_replace(name, std::regex("-stable$"), "");
+                    }
+                    addChannel(url, name);
                 }
                 break;
             case cRemove:

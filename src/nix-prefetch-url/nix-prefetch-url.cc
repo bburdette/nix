@@ -102,7 +102,7 @@ static int _main(int argc, char * * argv)
         Finally f([]() { stopProgressBar(); });
 
         if (isatty(STDERR_FILENO))
-          startProgressBar();
+            startProgressBar();
 
         auto store = openStore();
         auto state = std::make_unique<EvalState>(myArgs.searchPath, store);

@@ -102,31 +102,31 @@ struct GitInput : Input
         if (submodules) cacheType += "-submodules";
 
         auto getImmutableAttrs = [&]()
-        {
-            return Attrs({
-                {"type", cacheType},
-                {"name", name},
-                {"rev", input->rev->gitRev()},
-            });
-        };
+            {
+                return Attrs({
+                    {"type", cacheType},
+                    {"name", name},
+                    {"rev", input->rev->gitRev()},
+                });
+            };
 
         auto makeResult = [&](const Attrs & infoAttrs, StorePath && storePath)
             -> std::pair<Tree, std::shared_ptr<const Input>>
-        {
-            assert(input->rev);
-            assert(!rev || rev == input->rev);
-            return {
-                Tree {
-                    .actualPath = store->toRealPath(storePath),
-                    .storePath = std::move(storePath),
-                    .info = TreeInfo {
-                        .revCount = shallow ? std::nullopt : std::optional(getIntAttr(infoAttrs, "revCount")),
-                        .lastModified = getIntAttr(infoAttrs, "lastModified"),
+            {
+                assert(input->rev);
+                assert(!rev || rev == input->rev);
+                return {
+                    Tree {
+                        .actualPath = store->toRealPath(storePath),
+                        .storePath = std::move(storePath),
+                        .info = TreeInfo {
+                            .revCount = shallow ? std::nullopt : std::optional(getIntAttr(infoAttrs, "revCount")),
+                            .lastModified = getIntAttr(infoAttrs, "lastModified"),
+                        },
                     },
-                },
-                input
+                    input
+                };
             };
-        };
 
         if (rev) {
             if (auto res = getCache()->lookup(store, getImmutableAttrs()))
@@ -148,9 +148,9 @@ struct GitInput : Input
                 "git",
                 true,
                 { "-C", actualUrl, "rev-parse", "--git-common-dir" }
-            ));
+                ));
             if (commonGitDir != ".git")
-                    gitDir = commonGitDir;
+                gitDir = commonGitDir;
 
             bool haveCommits = !readDirectory(gitDir + "/refs/heads").empty();
 
@@ -181,19 +181,19 @@ struct GitInput : Input
                     runProgram("git", true, gitOpts), "\0"s);
 
                 PathFilter filter = [&](const Path & p) -> bool {
-                    assert(hasPrefix(p, actualUrl));
-                    std::string file(p, actualUrl.size() + 1);
+                        assert(hasPrefix(p, actualUrl));
+                        std::string file(p, actualUrl.size() + 1);
 
-                    auto st = lstat(p);
+                        auto st = lstat(p);
 
-                    if (S_ISDIR(st.st_mode)) {
-                        auto prefix = file + "/";
-                        auto i = files.lower_bound(prefix);
-                        return i != files.end() && hasPrefix(*i, prefix);
-                    }
+                        if (S_ISDIR(st.st_mode)) {
+                            auto prefix = file + "/";
+                            auto i = files.lower_bound(prefix);
+                            return i != files.end() && hasPrefix(*i, prefix);
+                        }
 
-                    return files.count(file);
-                };
+                        return files.count(file);
+                    };
 
                 auto storePath = store->addToStore("source", actualUrl, FileIngestionMethod::Recursive, htSHA256, filter);
 
@@ -214,11 +214,11 @@ struct GitInput : Input
         if (!input->ref) input->ref = isLocal ? readHead(actualUrl) : "master";
 
         Attrs mutableAttrs({
-            {"type", cacheType},
-            {"name", name},
-            {"url", actualUrl},
-            {"ref", *input->ref},
-        });
+                {"type", cacheType},
+                {"name", name},
+                {"url", actualUrl},
+                {"ref", *input->ref},
+            });
 
         Path repoDir;
 
@@ -342,10 +342,10 @@ struct GitInput : Input
             // FIXME: should pipe this, or find some better way to extract a
             // revision.
             auto source = sinkToSource([&](Sink & sink) {
-                RunOptions gitOptions("git", { "-C", repoDir, "archive", input->rev->gitRev() });
-                gitOptions.standardOut = &sink;
-                runProgram2(gitOptions);
-            });
+                    RunOptions gitOptions("git", { "-C", repoDir, "archive", input->rev->gitRev() });
+                    gitOptions.standardOut = &sink;
+                    runProgram2(gitOptions);
+                });
 
             unpackTarfile(*source, tmpDir);
         }
@@ -355,9 +355,9 @@ struct GitInput : Input
         auto lastModified = std::stoull(runProgram("git", true, { "-C", repoDir, "log", "-1", "--format=%ct", input->rev->gitRev() }));
 
         Attrs infoAttrs({
-            {"rev", input->rev->gitRev()},
-            {"lastModified", lastModified},
-        });
+                {"rev", input->rev->gitRev()},
+                {"lastModified", lastModified},
+            });
 
         if (!shallow)
             infoAttrs.insert_or_assign("revCount",
@@ -436,6 +436,6 @@ struct GitInputScheme : InputScheme
     }
 };
 
-static auto r1 = OnStartup([] { registerInputScheme(std::make_unique<GitInputScheme>()); });
+static auto r1 = OnStartup([]{ registerInputScheme(std::make_unique<GitInputScheme>()); });
 
 }

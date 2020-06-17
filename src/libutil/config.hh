@@ -130,7 +130,7 @@ public:
        std::cout << foo << "\n"; // will print 123 unless overriden
      }
    };
-*/
+ */
 
 class Config : public AbstractConfig
 {
@@ -241,7 +241,7 @@ public:
 
     void set(const std::string & str) override;
 
-    virtual void override(const T & v)
+    virtual void override (const T & v)
     {
         overriden = true;
         value = v;

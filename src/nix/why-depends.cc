@@ -208,11 +208,11 @@ struct CmdWhyDepends : SourceExprCommand
                             size_t margin = 32;
                             auto pos2 = pos >= margin ? pos - margin : 0;
                             hits[hash].emplace_back(fmt("%s: …%s…\n",
-                                    p2,
-                                    hilite(filterPrintable(
-                                            std::string(contents, pos2, pos - pos2 + hash.size() + margin)),
-                                        pos - pos2, StorePath::HashLen,
-                                        getColour(hash))));
+                                p2,
+                                hilite(filterPrintable(
+                                    std::string(contents, pos2, pos - pos2 + hash.size() + margin)),
+                                    pos - pos2, StorePath::HashLen,
+                                    getColour(hash))));
                         }
                     }
                 }
@@ -224,7 +224,7 @@ struct CmdWhyDepends : SourceExprCommand
                         auto pos = target.find(hash);
                         if (pos != std::string::npos)
                             hits[hash].emplace_back(fmt("%s -> %s\n", p2,
-                                    hilite(target, pos, StorePath::HashLen, getColour(hash))));
+                                hilite(target, pos, StorePath::HashLen, getColour(hash))));
                     }
                 }
             };

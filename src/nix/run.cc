@@ -69,9 +69,9 @@ struct CmdShell : InstallablesCommand, RunCommon, MixEnvironment
             .description = "command and arguments to be executed; defaults to '$SHELL'",
             .labels = {"command", "args"},
             .handler = {[&](std::vector<std::string> ss) {
-                if (ss.empty()) throw UsageError("--command requires at least one argument");
-                command = ss;
-            }}
+                    if (ss.empty()) throw UsageError("--command requires at least one argument");
+                    command = ss;
+                }}
         });
     }
 
@@ -202,8 +202,8 @@ void chrootHelper(int argc, char * * argv)
         if (chdir(cwd) == -1)
             throw SysError("chdir to '%s' in chroot", cwd);
     } else
-        if (mount(realStoreDir.c_str(), storeDir.c_str(), "", MS_BIND, 0) == -1)
-            throw SysError("mounting '%s' on '%s'", realStoreDir, storeDir);
+    if (mount(realStoreDir.c_str(), storeDir.c_str(), "", MS_BIND, 0) == -1)
+        throw SysError("mounting '%s' on '%s'", realStoreDir, storeDir);
 
     writeFile("/proc/self/setgroups", "deny");
     writeFile("/proc/self/uid_map", fmt("%d %d %d", uid, uid, 1));

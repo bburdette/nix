@@ -134,10 +134,10 @@ static Derivation parseDerivation(const Store & store, const string & s)
         expect(str, ","); auto hash = parseString(str);
         expect(str, ")");
         drv.outputs.emplace(id, DerivationOutput {
-            .path = std::move(path),
-            .hashAlgo = std::move(hashAlgo),
-            .hash = std::move(hash)
-        });
+                .path = std::move(path),
+                .hashAlgo = std::move(hashAlgo),
+                .hash = std::move(hash)
+            });
     }
 
     /* Parse the list of input derivations. */
@@ -319,8 +319,8 @@ bool isDerivation(const string & fileName)
 bool BasicDerivation::isFixedOutput() const
 {
     return outputs.size() == 1 &&
-        outputs.begin()->first == "out" &&
-        outputs.begin()->second.hash != "";
+           outputs.begin()->first == "out" &&
+           outputs.begin()->second.hash != "";
 }
 
 
@@ -339,7 +339,7 @@ DrvHashes drvHashes;
    function, we do not want to rebuild everything depending on it
    (after all, (the hash of) the file being downloaded is unchanged).
    So the *output paths* should not change.  On the other hand, the
-   *derivation paths* should change to reflect the new dependency
+ * derivation paths* should change to reflect the new dependency
    graph.
 
    That's what this function does: it returns a hash which is just the
@@ -417,10 +417,10 @@ Source & readDerivation(Source & in, const Store & store, BasicDerivation & drv)
         auto hashAlgo = readString(in);
         auto hash = readString(in);
         drv.outputs.emplace(name, DerivationOutput {
-            .path = std::move(path),
-            .hashAlgo = std::move(hashAlgo),
-            .hash = std::move(hash)
-        });
+                .path = std::move(path),
+                .hashAlgo = std::move(hashAlgo),
+                .hash = std::move(hash)
+            });
     }
 
     drv.inputSrcs = readStorePaths<StorePathSet>(store, in);

@@ -17,21 +17,21 @@ DownloadFileResult downloadFile(
     // FIXME: check store
 
     Attrs inAttrs({
-        {"type", "file"},
-        {"url", url},
-        {"name", name},
-    });
+            {"type", "file"},
+            {"url", url},
+            {"name", name},
+        });
 
     auto cached = getCache()->lookupExpired(store, inAttrs);
 
     auto useCached = [&]() -> DownloadFileResult
-    {
-        return {
-            .storePath = std::move(cached->storePath),
-            .etag = getStrAttr(cached->infoAttrs, "etag"),
-            .effectiveUrl = getStrAttr(cached->infoAttrs, "url")
+        {
+            return {
+                .storePath = std::move(cached->storePath),
+                .etag = getStrAttr(cached->infoAttrs, "etag"),
+                .effectiveUrl = getStrAttr(cached->infoAttrs, "url")
+            };
         };
-    };
 
     if (cached && !cached->expired)
         return useCached();
@@ -53,9 +53,9 @@ DownloadFileResult downloadFile(
     // FIXME: write to temporary file.
 
     Attrs infoAttrs({
-        {"etag", res.etag},
-        {"url", res.effectiveUri},
-    });
+            {"etag", res.etag},
+            {"url", res.effectiveUri},
+        });
 
     std::optional<StorePath> storePath;
 
@@ -109,10 +109,10 @@ Tree downloadTarball(
     bool immutable)
 {
     Attrs inAttrs({
-        {"type", "tarball"},
-        {"url", url},
-        {"name", name},
-    });
+            {"type", "tarball"},
+            {"url", url},
+            {"name", name},
+        });
 
     auto cached = getCache()->lookupExpired(store, inAttrs);
 
@@ -146,9 +146,9 @@ Tree downloadTarball(
     }
 
     Attrs infoAttrs({
-        {"lastModified", lastModified},
-        {"etag", res.etag},
-    });
+            {"lastModified", lastModified},
+            {"etag", res.etag},
+        });
 
     getCache()->add(
         store,
@@ -270,6 +270,6 @@ struct TarballInputScheme : InputScheme
     }
 };
 
-static auto r1 = OnStartup([] { registerInputScheme(std::make_unique<TarballInputScheme>()); });
+static auto r1 = OnStartup([]{ registerInputScheme(std::make_unique<TarballInputScheme>()); });
 
 }

@@ -51,11 +51,11 @@ typedef double NixFloat;
 class ExternalValueBase
 {
     friend std::ostream & operator << (std::ostream & str, const ExternalValueBase & v);
-    protected:
+protected:
     /* Print out the value */
     virtual std::ostream & print(std::ostream & str) const = 0;
 
-    public:
+public:
     /* Return a simple string describing the type */
     virtual string showType() const = 0;
 

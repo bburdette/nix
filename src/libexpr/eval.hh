@@ -38,8 +38,8 @@ struct PrimOp
 struct Env
 {
     Env * up;
-    unsigned short prevWith:14; // nr of levels up to next `with' environment
-    enum { Plain = 0, HasWithExpr, HasWithAttrs } type:2;
+    unsigned short prevWith : 14; // nr of levels up to next `with' environment
+    enum { Plain = 0, HasWithExpr, HasWithAttrs } type : 2;
     Value * values[0];
 };
 
@@ -349,26 +349,26 @@ struct EvalSettings : Config
     static Strings getDefaultNixPath();
 
     Setting<bool> enableNativeCode{this, false, "allow-unsafe-native-code-during-evaluation",
-        "Whether builtin functions that allow executing native code should be enabled."};
+                                   "Whether builtin functions that allow executing native code should be enabled."};
 
     Setting<Strings> nixPath{this, getDefaultNixPath(), "nix-path",
-        "List of directories to be searched for <...> file references."};
+                             "List of directories to be searched for <...> file references."};
 
     Setting<bool> restrictEval{this, false, "restrict-eval",
-        "Whether to restrict file system access to paths in $NIX_PATH, "
-        "and network access to the URI prefixes listed in 'allowed-uris'."};
+                               "Whether to restrict file system access to paths in $NIX_PATH, "
+                               "and network access to the URI prefixes listed in 'allowed-uris'."};
 
     Setting<bool> pureEval{this, false, "pure-eval",
-        "Whether to restrict file system and network access to files specified by cryptographic hash."};
+                           "Whether to restrict file system and network access to files specified by cryptographic hash."};
 
     Setting<bool> enableImportFromDerivation{this, true, "allow-import-from-derivation",
-        "Whether the evaluator allows importing the result of a derivation."};
+                                             "Whether the evaluator allows importing the result of a derivation."};
 
     Setting<Strings> allowedUris{this, {}, "allowed-uris",
-        "Prefixes of URIs that builtin functions such as fetchurl and fetchGit are allowed to fetch."};
+                                 "Prefixes of URIs that builtin functions such as fetchurl and fetchGit are allowed to fetch."};
 
     Setting<bool> traceFunctionCalls{this, false, "trace-function-calls",
-        "Emit log messages for each function entry and exit at the 'vomit' log level (-vvvv)."};
+                                     "Emit log messages for each function entry and exit at the 'vomit' log level (-vvvv)."};
 };
 
 extern EvalSettings evalSettings;

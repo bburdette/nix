@@ -85,9 +85,9 @@ void Args::printFlags(std::ostream & out)
     for (auto & flag : longFlags) {
         if (hiddenCategories.count(flag.second->category)) continue;
         table.push_back(std::make_pair(
-                (flag.second->shortName ? std::string("-") + flag.second->shortName + ", " : "    ")
-                + "--" + flag.first + renderLabels(flag.second->labels),
-                flag.second->description));
+            (flag.second->shortName ? std::string("-") + flag.second->shortName + ", " : "    ")
+            + "--" + flag.first + renderLabels(flag.second->labels),
+            flag.second->description));
     }
     printTable(out, table);
 }
@@ -97,18 +97,18 @@ bool Args::processFlag(Strings::iterator & pos, Strings::iterator end)
     assert(pos != end);
 
     auto process = [&](const std::string & name, const Flag & flag) -> bool {
-        ++pos;
-        std::vector<std::string> args;
-        for (size_t n = 0 ; n < flag.handler.arity; ++n) {
-            if (pos == end) {
-                if (flag.handler.arity == ArityAny) break;
-                throw UsageError("flag '%s' requires %d argument(s)", name, flag.handler.arity);
+            ++pos;
+            std::vector<std::string> args;
+            for (size_t n = 0; n < flag.handler.arity; ++n) {
+                if (pos == end) {
+                    if (flag.handler.arity == ArityAny) break;
+                    throw UsageError("flag '%s' requires %d argument(s)", name, flag.handler.arity);
+                }
+                args.push_back(*pos++);
             }
-            args.push_back(*pos++);
-        }
-        flag.handler.fun(std::move(args));
-        return true;
-    };
+            flag.handler.fun(std::move(args));
+            return true;
+        };
 
     if (string(*pos, 0, 2) == "--") {
         auto i = longFlags.find(string(*pos, 2));
@@ -161,10 +161,10 @@ Args::Flag Args::Flag::mkHashTypeFlag(std::string && longName, HashType * ht)
         .description = "hash algorithm ('md5', 'sha1', 'sha256', or 'sha512')",
         .labels = {"hash-algo"},
         .handler = {[ht](std::string s) {
-            *ht = parseHashType(s);
-            if (*ht == htUnknown)
-                throw UsageError("unknown hash type '%1%'", s);
-        }}
+                    *ht = parseHashType(s);
+                    if (*ht == htUnknown)
+                        throw UsageError("unknown hash type '%1%'", s);
+                }}
     };
 }
 
@@ -216,17 +216,17 @@ MultiCommand::MultiCommand(const Commands & commands)
     : commands(commands)
 {
     expectedArgs.push_back(ExpectedArg{"command", 1, true, [=](std::vector<std::string> ss) {
-        assert(!command);
-        auto cmd = ss[0];
-        if (auto alias = get(deprecatedAliases, cmd)) {
-            warn("'%s' is a deprecated alias for '%s'", cmd, *alias);
-            cmd = *alias;
-        }
-        auto i = commands.find(cmd);
-        if (i == commands.end())
-            throw UsageError("'%s' is not a recognised command", cmd);
-        command = {cmd, i->second()};
-    }});
+                assert(!command);
+                auto cmd = ss[0];
+                if (auto alias = get(deprecatedAliases, cmd)) {
+                    warn("'%s' is a deprecated alias for '%s'", cmd, *alias);
+                    cmd = *alias;
+                }
+                auto i = commands.find(cmd);
+                if (i == commands.end())
+                    throw UsageError("'%s' is not a recognised command", cmd);
+                command = {cmd, i->second()};
+            }});
 
     categories[Command::catDefault] = "Available commands";
 }

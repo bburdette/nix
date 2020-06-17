@@ -136,7 +136,7 @@ StorePathWithOutputs Store::followLinksToStorePathWithOutputs(std::string_view p
    path for a copied source.  The former would have a <s> starting with
    "output:out:", while the latter would have a <s> starting with
    "source:".
-*/
+ */
 
 
 StorePath Store::makeStorePath(const string & type,
@@ -295,12 +295,12 @@ ref<const ValidPathInfo> Store::queryPathInfo(const StorePath & storePath)
 
     queryPathInfo(storePath,
         {[&](std::future<ref<const ValidPathInfo>> result) {
-            try {
-                promise.set_value(result.get());
-            } catch (...) {
-                promise.set_exception(std::current_exception());
-            }
-        }});
+                try {
+                    promise.set_value(result.get());
+                } catch (...) {
+                    promise.set_exception(std::current_exception());
+                }
+            }});
 
     return promise.get_future().get();
 }
@@ -347,25 +347,25 @@ void Store::queryPathInfo(const StorePath & storePath,
     queryPathInfoUncached(storePath,
         {[this, storePath{printStorePath(storePath)}, hashPart, callbackPtr](std::future<std::shared_ptr<const ValidPathInfo>> fut) {
 
-            try {
-                auto info = fut.get();
+                try {
+                    auto info = fut.get();
 
-                if (diskCache)
-                    diskCache->upsertNarInfo(getUri(), hashPart, info);
+                    if (diskCache)
+                        diskCache->upsertNarInfo(getUri(), hashPart, info);
 
-                {
-                    auto state_(state.lock());
-                    state_->pathInfoCache.upsert(hashPart, PathInfoCacheValue { .value = info });
-                }
+                    {
+                        auto state_(state.lock());
+                        state_->pathInfoCache.upsert(hashPart, PathInfoCacheValue { .value = info });
+                    }
 
-                if (!info || info->path != parseStorePath(storePath)) {
-                    stats.narInfoMissing++;
-                    throw InvalidPath("path '%s' is not valid", storePath);
-                }
+                    if (!info || info->path != parseStorePath(storePath)) {
+                        stats.narInfoMissing++;
+                        throw InvalidPath("path '%s' is not valid", storePath);
+                    }
 
-                (*callbackPtr)(ref<const ValidPathInfo>(info));
-            } catch (...) { callbackPtr->rethrow(); }
-        }});
+                    (*callbackPtr)(ref<const ValidPathInfo>(info));
+                } catch (...) { callbackPtr->rethrow(); }
+            }});
 }
 
 
@@ -384,21 +384,21 @@ StorePathSet Store::queryValidPaths(const StorePathSet & paths, SubstituteFlag m
     ThreadPool pool;
 
     auto doQuery = [&](const Path & path) {
-        checkInterrupt();
-        queryPathInfo(parseStorePath(path), {[path, this, &state_, &wakeup](std::future<ref<const ValidPathInfo>> fut) {
-            auto state(state_.lock());
-            try {
-                auto info = fut.get();
-                state->valid.insert(parseStorePath(path));
-            } catch (InvalidPath &) {
-            } catch (...) {
-                state->exc = std::current_exception();
-            }
-            assert(state->left);
-            if (!--state->left)
-                wakeup.notify_one();
-        }});
-    };
+            checkInterrupt();
+            queryPathInfo(parseStorePath(path), {[path, this, &state_, &wakeup](std::future<ref<const ValidPathInfo>> fut) {
+                    auto state(state_.lock());
+                    try {
+                        auto info = fut.get();
+                        state->valid.insert(parseStorePath(path));
+                    } catch (InvalidPath &) {
+                    } catch (...) {
+                        state->exc = std::current_exception();
+                    }
+                    assert(state->left);
+                    if (!--state->left)
+                        wakeup.notify_one();
+                }});
+        };
 
     for (auto & path : paths)
         pool.enqueue(std::bind(doQuery, printStorePath(path))); // FIXME
@@ -462,8 +462,8 @@ void Store::pathInfoToJSON(JSONPlaceholder & jsonOut, const StorePathSet & store
             auto info = queryPathInfo(storePath);
 
             jsonPath
-                .attr("narHash", info->narHash.to_string(hashBase, true))
-                .attr("narSize", info->narSize);
+            .attr("narHash", info->narHash.to_string(hashBase, true))
+            .attr("narSize", info->narSize);
 
             {
                 auto jsonRefs = jsonPath.list("references");
@@ -602,15 +602,15 @@ void copyStorePath(ref<Store> srcStore, ref<Store> dstStore,
     }
 
     auto source = sinkToSource([&](Sink & sink) {
-        LambdaSink wrapperSink([&](const unsigned char * data, size_t len) {
-            sink(data, len);
-            total += len;
-            act.progress(total, info->narSize);
+            LambdaSink wrapperSink([&](const unsigned char * data, size_t len) {
+                sink(data, len);
+                total += len;
+                act.progress(total, info->narSize);
+            });
+            srcStore->narFromPath(storePath, wrapperSink);
+        }, [&]() {
+            throw EndOfFile("NAR for '%s' fetched from '%s' is incomplete", srcStore->printStorePath(storePath), srcStore->getUri());
         });
-        srcStore->narFromPath(storePath, wrapperSink);
-    }, [&]() {
-           throw EndOfFile("NAR for '%s' fetched from '%s' is incomplete", srcStore->printStorePath(storePath), srcStore->getUri());
-    });
 
     dstStore->addToStore(*info, *source, repair, checkSigs);
 }
@@ -635,8 +635,8 @@ void copyPaths(ref<Store> srcStore, ref<Store> dstStore, const StorePathSet & st
     std::atomic<uint64_t> nrRunning{0};
 
     auto showProgress = [&]() {
-        act.progress(nrDone, missing.size(), nrRunning, nrFailed);
-    };
+            act.progress(nrDone, missing.size(), nrRunning, nrFailed);
+        };
 
     ThreadPool pool;
 
@@ -761,12 +761,12 @@ void ValidPathInfo::sign(const Store & store, const SecretKey & secretKey)
 bool ValidPathInfo::isContentAddressed(const Store & store) const
 {
     auto warn = [&]() {
-        logWarning(
-            ErrorInfo{
+            logWarning(
+                ErrorInfo{
                 .name = "Path not content-addressed",
                 .hint = hintfmt("path '%s' claims to be content-addressed but isn't", store.printStorePath(path))
             });
-    };
+        };
 
     if (hasPrefix(ca, "text:")) {
         Hash hash(ca.substr(5));
@@ -825,8 +825,8 @@ Strings ValidPathInfo::shortRefs() const
 std::string makeFixedOutputCA(FileIngestionMethod recursive, const Hash & hash)
 {
     return "fixed:"
-        + (recursive == FileIngestionMethod::Recursive ? (std::string) "r:" : "")
-        + hash.to_string(Base32, true);
+           + (recursive == FileIngestionMethod::Recursive ? (std::string) "r:" : "")
+           + hash.to_string(Base32, true);
 }
 
 
@@ -894,52 +894,52 @@ StoreType getStoreType(const std::string & uri, const std::string & stateDir)
 
 
 static RegisterStoreImplementation regStore([](
-    const std::string & uri, const Store::Params & params)
+        const std::string & uri, const Store::Params & params)
     -> std::shared_ptr<Store>
-{
-    switch (getStoreType(uri, get(params, "state").value_or(settings.nixStateDir))) {
-        case tDaemon:
-            return std::shared_ptr<Store>(std::make_shared<UDSRemoteStore>(params));
-        case tLocal: {
-            Store::Params params2 = params;
-            if (hasPrefix(uri, "/"))
-                params2["root"] = uri;
-            return std::shared_ptr<Store>(std::make_shared<LocalStore>(params2));
+    {
+        switch (getStoreType(uri, get(params, "state").value_or(settings.nixStateDir))) {
+            case tDaemon:
+                return std::shared_ptr<Store>(std::make_shared<UDSRemoteStore>(params));
+            case tLocal: {
+                Store::Params params2 = params;
+                if (hasPrefix(uri, "/"))
+                    params2["root"] = uri;
+                return std::shared_ptr<Store>(std::make_shared<LocalStore>(params2));
+            }
+            default:
+                return nullptr;
         }
-        default:
-            return nullptr;
-    }
-});
+    });
 
 
 std::list<ref<Store>> getDefaultSubstituters()
 {
     static auto stores([]() {
-        std::list<ref<Store>> stores;
+            std::list<ref<Store>> stores;
 
-        StringSet done;
+            StringSet done;
 
-        auto addStore = [&](const std::string & uri) {
-            if (!done.insert(uri).second) return;
-            try {
-                stores.push_back(openStore(uri));
-            } catch (Error & e) {
-                logWarning(e.info());
-            }
-        };
+            auto addStore = [&](const std::string & uri) {
+                if (!done.insert(uri).second) return;
+                try {
+                    stores.push_back(openStore(uri));
+                } catch (Error & e) {
+                    logWarning(e.info());
+                }
+            };
 
-        for (auto uri : settings.substituters.get())
-            addStore(uri);
+            for (auto uri : settings.substituters.get())
+                addStore(uri);
 
-        for (auto uri : settings.extraSubstituters.get())
-            addStore(uri);
+            for (auto uri : settings.extraSubstituters.get())
+                addStore(uri);
 
-        stores.sort([](ref<Store> & a, ref<Store> & b) {
-            return a->priority < b->priority;
-        });
+            stores.sort([](ref<Store> & a, ref<Store> & b) {
+                return a->priority < b->priority;
+            });
 
-        return stores;
-    } ());
+            return stores;
+        } ());
 
     return stores;
 }

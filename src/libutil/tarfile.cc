@@ -26,10 +26,10 @@ struct TarArchive {
         archive_read_support_filter_all(archive);
         archive_read_support_format_all(archive);
         check(archive_read_open(archive,
-                (void *)this,
-                TarArchive::callback_open,
-                TarArchive::callback_read,
-                TarArchive::callback_close),
+            (void *)this,
+            TarArchive::callback_open,
+            TarArchive::callback_read,
+            TarArchive::callback_close),
             "failed to open archive: %s");
     }
 

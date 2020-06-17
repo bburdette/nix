@@ -110,16 +110,16 @@ std::string Hash::to_string(Base base, bool includeType) const
         s += base == SRI ? '-' : ':';
     }
     switch (base) {
-    case Base16:
-        s += printHash16(*this);
-        break;
-    case Base32:
-        s += printHash32(*this);
-        break;
-    case Base64:
-    case SRI:
-        s += base64Encode(std::string((const char *) hash, hashSize));
-        break;
+        case Base16:
+            s += printHash16(*this);
+            break;
+        case Base32:
+            s += printHash32(*this);
+            break;
+        case Base64:
+        case SRI:
+            s += base64Encode(std::string((const char *) hash, hashSize));
+            break;
     }
     return s;
 }
@@ -157,16 +157,16 @@ Hash::Hash(std::string_view s, HashType type)
     if (!isSRI && size == base16Len()) {
 
         auto parseHexDigit = [&](char c) {
-            if (c >= '0' && c <= '9') return c - '0';
-            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-            throw BadHash("invalid base-16 hash '%s'", s);
-        };
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                throw BadHash("invalid base-16 hash '%s'", s);
+            };
 
         for (unsigned int i = 0; i < hashSize; i++) {
             hash[i] =
                 parseHexDigit(s[pos + i * 2]) << 4
-                | parseHexDigit(s[pos + i * 2 + 1]);
+                    | parseHexDigit(s[pos + i * 2 + 1]);
         }
     }
 

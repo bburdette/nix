@@ -262,9 +262,9 @@ static void printTree(const StorePath & path,
 static void opQuery(Strings opFlags, Strings opArgs)
 {
     enum QueryType
-        { qDefault, qOutputs, qRequisites, qReferences, qReferrers
-        , qReferrersClosure, qDeriver, qBinding, qHash, qSize
-        , qTree, qGraph, qGraphML, qResolve, qRoots };
+    { qDefault, qOutputs, qRequisites, qReferences, qReferrers
+      , qReferrersClosure, qDeriver, qBinding, qHash, qSize
+      , qTree, qGraph, qGraphML, qResolve, qRoots };
     QueryType query = qDefault;
     bool useOutput = false;
     bool includeOutputs = false;
@@ -707,7 +707,7 @@ static void opVerify(Strings opFlags, Strings opArgs)
         logWarning({
             .name = "Store consistency",
             .description = "not all errors were fixed"
-            });
+        });
         throw Exit(1);
     }
 }

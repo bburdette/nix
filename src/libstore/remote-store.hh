@@ -24,10 +24,10 @@ class RemoteStore : public virtual Store
 public:
 
     const Setting<int> maxConnections{(Store*) this, 1,
-            "max-connections", "maximum number of concurrent connections to the Nix daemon"};
+                                      "max-connections", "maximum number of concurrent connections to the Nix daemon"};
 
     const Setting<unsigned int> maxConnectionAge{(Store*) this, std::numeric_limits<unsigned int>::max(),
-            "max-connection-age", "number of seconds to reuse a connection"};
+                                                 "max-connection-age", "number of seconds to reuse a connection"};
 
     virtual bool sameMachine() = 0;
 

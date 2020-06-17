@@ -32,7 +32,7 @@ static string gcRootsDir = "gcroots";
 AutoCloseFD LocalStore::openGCLock(LockType lockType)
 {
     Path fnGCLock = (format("%1%/%2%")
-        % stateDir % gcLockName).str();
+                     % stateDir % gcLockName).str();
 
     debug(format("acquiring global GC lock '%1%'") % fnGCLock);
 
@@ -60,13 +60,13 @@ static void makeSymlink(const Path & link, const Path & target)
 
     /* Create the new symlink. */
     Path tempLink = (format("%1%.tmp-%2%-%3%")
-        % link % getpid() % random()).str();
+                     % link % getpid() % random()).str();
     createSymlink(target, tempLink);
 
     /* Atomically replace the old one. */
     if (rename(tempLink.c_str(), link.c_str()) == -1)
         throw SysError("cannot rename '%1%' to '%2%'",
-            tempLink , link);
+            tempLink, link);
 }
 
 
@@ -80,7 +80,7 @@ void LocalStore::addIndirectRoot(const Path & path)
 {
     string hash = hashString(htSHA1, path).to_string(Base32, false);
     Path realRoot = canonPath((format("%1%/%2%/auto/%3%")
-        % stateDir % gcRootsDir % hash).str());
+                               % stateDir % gcRootsDir % hash).str());
     makeSymlink(realRoot, path);
 }
 
@@ -92,8 +92,8 @@ Path LocalFSStore::addPermRoot(const StorePath & storePath,
 
     if (isInStore(gcRoot))
         throw Error(
-                "creating a garbage collector root (%1%) in the Nix store is forbidden "
-                "(are you running nix-build inside the store?)", gcRoot);
+            "creating a garbage collector root (%1%) in the Nix store is forbidden "
+            "(are you running nix-build inside the store?)", gcRoot);
 
     if (indirect) {
         /* Don't clobber the link if it already exists and doesn't
@@ -130,11 +130,11 @@ Path LocalFSStore::addPermRoot(const StorePath & storePath,
         auto roots = findRoots(false);
         if (roots[storePath].count(gcRoot) == 0)
             logWarning({
-                .name = "GC root",
-                .hint = hintfmt("warning: '%1%' is not in a directory where the garbage collector looks for roots; "
-                    "therefore, '%2%' might be removed by the garbage collector",
-                    gcRoot, printStorePath(storePath))
-            });
+                    .name = "GC root",
+                    .hint = hintfmt("warning: '%1%' is not in a directory where the garbage collector looks for roots; "
+                        "therefore, '%2%' might be removed by the garbage collector",
+                        gcRoot, printStorePath(storePath))
+                });
     }
 
     /* Grab the global GC root, causing us to block while a GC is in
@@ -262,12 +262,12 @@ void LocalStore::findTempRoots(FDs & fds, Roots & tempRoots, bool censor)
 void LocalStore::findRoots(const Path & path, unsigned char type, Roots & roots)
 {
     auto foundRoot = [&](const Path & path, const Path & target) {
-        auto storePath = maybeParseStorePath(toStorePath(target));
-        if (storePath && isValidPath(*storePath))
-            roots[std::move(*storePath)].emplace(path);
-        else
-            printInfo("skipping invalid root from '%1%' to '%2%'", path, target);
-    };
+            auto storePath = maybeParseStorePath(toStorePath(target));
+            if (storePath && isValidPath(*storePath))
+                roots[std::move(*storePath)].emplace(path);
+            else
+                printInfo("skipping invalid root from '%1%' to '%2%'", path, target);
+        };
 
     try {
 
@@ -365,7 +365,7 @@ try_again:
     }
     if (res > 0 && buf[0] == '/')
         roots[std::string(static_cast<char *>(buf), res)]
-            .emplace(file);
+        .emplace(file);
 }
 
 static string quoteRegexChars(const string & raw)
@@ -397,7 +397,7 @@ void LocalStore::findRuntimeRoots(Roots & roots, bool censor)
         while (errno = 0, ent = readdir(procDir.get())) {
             checkInterrupt();
             if (std::regex_match(ent->d_name, digitsRegex)) {
-                readProcLink(fmt("/proc/%s/exe" ,ent->d_name), unchecked);
+                readProcLink(fmt("/proc/%s/exe",ent->d_name), unchecked);
                 readProcLink(fmt("/proc/%s/cwd", ent->d_name), unchecked);
 
                 auto fdStr = fmt("/proc/%s/fd", ent->d_name);
@@ -510,7 +510,7 @@ bool LocalStore::isActiveTempFile(const GCState & state,
     const Path & path, const string & suffix)
 {
     return hasSuffix(path, suffix)
-        && state.tempRoots.count(parseStorePath(string(path, 0, path.size() - suffix.size())));
+           && state.tempRoots.count(parseStorePath(string(path, 0, path.size() - suffix.size())));
 }
 
 
@@ -884,15 +884,15 @@ void LocalStore::autoGC(bool sync)
     static auto fakeFreeSpaceFile = getEnv("_NIX_TEST_FREE_SPACE_FILE");
 
     auto getAvail = [this]() -> uint64_t {
-        if (fakeFreeSpaceFile)
-            return std::stoll(readFile(*fakeFreeSpaceFile));
+            if (fakeFreeSpaceFile)
+                return std::stoll(readFile(*fakeFreeSpaceFile));
 
-        struct statvfs st;
-        if (statvfs(realStoreDir.c_str(), &st))
-            throw SysError("getting filesystem info about '%s'", realStoreDir);
+            struct statvfs st;
+            if (statvfs(realStoreDir.c_str(), &st))
+                throw SysError("getting filesystem info about '%s'", realStoreDir);
 
-        return (uint64_t) st.f_bavail * st.f_frsize;
-    };
+            return (uint64_t) st.f_bavail * st.f_frsize;
+        };
 
     std::shared_future<void> future;
 
@@ -924,37 +924,37 @@ void LocalStore::autoGC(bool sync)
 
         std::thread([promise{std::move(promise)}, this, avail, getAvail]() mutable {
 
-            try {
+                try {
 
-                /* Wake up any threads waiting for the auto-GC to finish. */
-                Finally wakeup([&]() {
-                    auto state(_state.lock());
-                    state->gcRunning = false;
-                    state->lastGCCheck = std::chrono::steady_clock::now();
-                    promise.set_value();
-                });
+                    /* Wake up any threads waiting for the auto-GC to finish. */
+                    Finally wakeup([&]() {
+                        auto state(_state.lock());
+                        state->gcRunning = false;
+                        state->lastGCCheck = std::chrono::steady_clock::now();
+                        promise.set_value();
+                    });
 
-                GCOptions options;
-                options.maxFreed = settings.maxFree - avail;
+                    GCOptions options;
+                    options.maxFreed = settings.maxFree - avail;
 
-                printInfo("running auto-GC to free %d bytes", options.maxFreed);
+                    printInfo("running auto-GC to free %d bytes", options.maxFreed);
 
-                GCResults results;
+                    GCResults results;
 
-                collectGarbage(options, results);
+                    collectGarbage(options, results);
 
-                _state.lock()->availAfterGC = getAvail();
+                    _state.lock()->availAfterGC = getAvail();
 
-            } catch (...) {
-                // FIXME: we could propagate the exception to the
-                // future, but we don't really care.
-                ignoreException();
-            }
+                } catch (...) {
+                    // FIXME: we could propagate the exception to the
+                    // future, but we don't really care.
+                    ignoreException();
+                }
 
-        }).detach();
+            }).detach();
     }
 
- sync:
+sync:
     // Wait for the future outside of the state lock.
     if (sync) future.get();
 }

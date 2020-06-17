@@ -70,7 +70,7 @@ public:
     template<typename T2>
     operator ref<T2> () const
     {
-        return ref<T2>((std::shared_ptr<T2>) p);
+        return ref<T2>((std::shared_ptr<T2>)p);
     }
 
 private:

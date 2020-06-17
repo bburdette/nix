@@ -97,7 +97,7 @@ BuildEnvironment readEnvironment(const Path & path)
 
 const static std::string getEnvSh =
     #include "get-env.sh.gen.hh"
-    ;
+;
 
 /* Given an existing derivation, return the shell environment as
    initialised by stdenv's setup script. We do this by building a
@@ -243,9 +243,9 @@ struct CmdDevelop : Common, MixEnvironment
             .description = "command and arguments to be executed insted of an interactive shell",
             .labels = {"command", "args"},
             .handler = {[&](std::vector<std::string> ss) {
-                if (ss.empty()) throw UsageError("--command requires at least one argument");
-                command = ss;
-            }}
+                    if (ss.empty()) throw UsageError("--command requires at least one argument");
+                    command = ss;
+                }}
         });
     }
 

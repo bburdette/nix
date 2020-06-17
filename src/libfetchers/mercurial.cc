@@ -100,56 +100,56 @@ struct MercurialInput : Input
                     runProgram("hg", true, { "status", "-R", actualUrl, "--clean", "--modified", "--added", "--no-status", "--print0" }), "\0"s);
 
                 PathFilter filter = [&](const Path & p) -> bool {
-                    assert(hasPrefix(p, actualUrl));
-                    std::string file(p, actualUrl.size() + 1);
+                        assert(hasPrefix(p, actualUrl));
+                        std::string file(p, actualUrl.size() + 1);
 
-                    auto st = lstat(p);
+                        auto st = lstat(p);
 
-                    if (S_ISDIR(st.st_mode)) {
-                        auto prefix = file + "/";
-                        auto i = files.lower_bound(prefix);
-                        return i != files.end() && hasPrefix(*i, prefix);
-                    }
+                        if (S_ISDIR(st.st_mode)) {
+                            auto prefix = file + "/";
+                            auto i = files.lower_bound(prefix);
+                            return i != files.end() && hasPrefix(*i, prefix);
+                        }
 
-                    return files.count(file);
-                };
+                        return files.count(file);
+                    };
 
                 auto storePath = store->addToStore("source", actualUrl, FileIngestionMethod::Recursive, htSHA256, filter);
 
                 return {Tree {
-                    .actualPath = store->printStorePath(storePath),
-                    .storePath = std::move(storePath),
-                }, input};
+                            .actualPath = store->printStorePath(storePath),
+                            .storePath = std::move(storePath),
+                        }, input};
             }
         }
 
         if (!input->ref) input->ref = "default";
 
         auto getImmutableAttrs = [&]()
-        {
-            return Attrs({
-                {"type", "hg"},
-                {"name", name},
-                {"rev", input->rev->gitRev()},
-            });
-        };
+            {
+                return Attrs({
+                    {"type", "hg"},
+                    {"name", name},
+                    {"rev", input->rev->gitRev()},
+                });
+            };
 
         auto makeResult = [&](const Attrs & infoAttrs, StorePath && storePath)
             -> std::pair<Tree, std::shared_ptr<const Input>>
-        {
-            assert(input->rev);
-            assert(!rev || rev == input->rev);
-            return {
-                Tree{
-                    .actualPath = store->toRealPath(storePath),
-                    .storePath = std::move(storePath),
-                    .info = TreeInfo {
-                        .revCount = getIntAttr(infoAttrs, "revCount"),
+            {
+                assert(input->rev);
+                assert(!rev || rev == input->rev);
+                return {
+                    Tree{
+                        .actualPath = store->toRealPath(storePath),
+                        .storePath = std::move(storePath),
+                        .info = TreeInfo {
+                            .revCount = getIntAttr(infoAttrs, "revCount"),
+                        },
                     },
-                },
-                input
+                    input
+                };
             };
-        };
 
         if (input->rev) {
             if (auto res = getCache()->lookup(store, getImmutableAttrs()))
@@ -160,11 +160,11 @@ struct MercurialInput : Input
         auto revOrRef = input->rev ? input->rev->gitRev() : *input->ref;
 
         Attrs mutableAttrs({
-            {"type", "hg"},
-            {"name", name},
-            {"url", actualUrl},
-            {"ref", *input->ref},
-        });
+                {"type", "hg"},
+                {"name", name},
+                {"url", actualUrl},
+                {"ref", *input->ref},
+            });
 
         if (auto res = getCache()->lookup(store, mutableAttrs)) {
             auto rev2 = Hash(getStrAttr(res->first, "rev"), htSHA1);
@@ -179,10 +179,10 @@ struct MercurialInput : Input
         /* If this is a commit hash that we already have, we don't
            have to pull again. */
         if (!(input->rev
-                && pathExists(cacheDir)
-                && runProgram(
-                    RunOptions("hg", { "log", "-R", cacheDir, "-r", input->rev->gitRev(), "--template", "1" })
-                    .killStderr(true)).second == "1"))
+              && pathExists(cacheDir)
+              && runProgram(
+                  RunOptions("hg", { "log", "-R", cacheDir, "-r", input->rev->gitRev(), "--template", "1" })
+                  .killStderr(true)).second == "1"))
         {
             Activity act(*logger, lvlTalkative, actUnknown, fmt("fetching Mercurial repository '%s'", actualUrl));
 
@@ -227,9 +227,9 @@ struct MercurialInput : Input
         auto storePath = store->addToStore(name, tmpDir);
 
         Attrs infoAttrs({
-            {"rev", input->rev->gitRev()},
-            {"revCount", (int64_t) revCount},
-        });
+                {"rev", input->rev->gitRev()},
+                {"revCount", (int64_t) revCount},
+            });
 
         if (!this->rev)
             getCache()->add(
@@ -298,6 +298,6 @@ struct MercurialInputScheme : InputScheme
     }
 };
 
-static auto r1 = OnStartup([] { registerInputScheme(std::make_unique<MercurialInputScheme>()); });
+static auto r1 = OnStartup([]{ registerInputScheme(std::make_unique<MercurialInputScheme>()); });
 
 }

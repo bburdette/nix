@@ -64,42 +64,42 @@ static void initAWS()
 {
     static std::once_flag flag;
     std::call_once(flag, []() {
-        Aws::SDKOptions options;
+            Aws::SDKOptions options;
 
-        /* We install our own OpenSSL locking function (see
-           shared.cc), so don't let aws-sdk-cpp override it. */
-        options.cryptoOptions.initAndCleanupOpenSSL = false;
+            /* We install our own OpenSSL locking function (see
+               shared.cc), so don't let aws-sdk-cpp override it. */
+            options.cryptoOptions.initAndCleanupOpenSSL = false;
 
-        if (verbosity >= lvlDebug) {
-            options.loggingOptions.logLevel =
-                verbosity == lvlDebug
+            if (verbosity >= lvlDebug) {
+                options.loggingOptions.logLevel =
+                    verbosity == lvlDebug
                 ? Aws::Utils::Logging::LogLevel::Debug
                 : Aws::Utils::Logging::LogLevel::Trace;
-            options.loggingOptions.logger_create_fn = [options]() {
-                return std::make_shared<AwsLogger>(options.loggingOptions.logLevel);
-            };
-        }
+                options.loggingOptions.logger_create_fn = [options]() {
+                    return std::make_shared<AwsLogger>(options.loggingOptions.logLevel);
+                };
+            }
 
-        Aws::InitAPI(options);
-    });
+            Aws::InitAPI(options);
+        });
 }
 
 S3Helper::S3Helper(const string & profile, const string & region, const string & scheme, const string & endpoint)
     : config(makeConfig(region, scheme, endpoint))
     , client(make_ref<Aws::S3::S3Client>(
-            profile == ""
+        profile == ""
             ? std::dynamic_pointer_cast<Aws::Auth::AWSCredentialsProvider>(
-                std::make_shared<Aws::Auth::DefaultAWSCredentialsProviderChain>())
+            std::make_shared<Aws::Auth::DefaultAWSCredentialsProviderChain>())
             : std::dynamic_pointer_cast<Aws::Auth::AWSCredentialsProvider>(
-                std::make_shared<Aws::Auth::ProfileConfigFileAWSCredentialsProvider>(profile.c_str())),
-            *config,
-            // FIXME: https://github.com/aws/aws-sdk-cpp/issues/759
+            std::make_shared<Aws::Auth::ProfileConfigFileAWSCredentialsProvider>(profile.c_str())),
+        *config,
+        // FIXME: https://github.com/aws/aws-sdk-cpp/issues/759
 #if AWS_VERSION_MAJOR == 1 && AWS_VERSION_MINOR < 3
-            false,
+        false,
 #else
-            Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never,
+        Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never,
 #endif
-            endpoint.empty()))
+        endpoint.empty()))
 {
 }
 
@@ -147,8 +147,8 @@ S3Helper::FileTransferResult S3Helper::getObject(
         .WithKey(key);
 
     request.SetResponseStreamFactory([&]() {
-        return Aws::New<std::stringstream>("STRINGSTREAM");
-    });
+            return Aws::New<std::stringstream>("STRINGSTREAM");
+        });
 
     FileTransferResult res;
 
@@ -271,20 +271,20 @@ struct S3BinaryCacheStoreImpl : public S3BinaryCacheStore
         auto maxThreads = std::thread::hardware_concurrency();
 
         static std::shared_ptr<Aws::Utils::Threading::PooledThreadExecutor>
-            executor = std::make_shared<Aws::Utils::Threading::PooledThreadExecutor>(maxThreads);
+        executor = std::make_shared<Aws::Utils::Threading::PooledThreadExecutor>(maxThreads);
 
         std::call_once(transferManagerCreated, [&]()
-        {
-            if (multipartUpload) {
-                TransferManagerConfiguration transferConfig(executor.get());
+            {
+                if (multipartUpload) {
+                    TransferManagerConfiguration transferConfig(executor.get());
 
-                transferConfig.s3Client = s3Helper.client;
-                transferConfig.bufferSize = bufferSize;
+                    transferConfig.s3Client = s3Helper.client;
+                    transferConfig.bufferSize = bufferSize;
 
-                transferConfig.uploadProgressCallback =
-                    [](const TransferManager *transferManager,
-                        const std::shared_ptr<const TransferHandle>
-                        &transferHandle)
+                    transferConfig.uploadProgressCallback =
+                        [](const TransferManager *transferManager,
+                           const std::shared_ptr<const TransferHandle>
+                           &transferHandle)
                     {
                         //FIXME: find a way to properly abort the multipart upload.
                         //checkInterrupt();
@@ -294,9 +294,9 @@ struct S3BinaryCacheStoreImpl : public S3BinaryCacheStore
                             transferHandle->GetBytesTotalSize());
                     };
 
-                transferManager = TransferManager::Create(transferConfig);
-            }
-        });
+                    transferManager = TransferManager::Create(transferConfig);
+                }
+            });
 
         auto now1 = std::chrono::steady_clock::now();
 
@@ -345,10 +345,10 @@ struct S3BinaryCacheStoreImpl : public S3BinaryCacheStore
 
         auto duration =
             std::chrono::duration_cast<std::chrono::milliseconds>(now2 - now1)
-                .count();
+            .count();
 
         printInfo(format("uploaded 's3://%1%/%2%' (%3% bytes) in %4% ms") %
-                  bucketName % path % data.size() % duration);
+            bucketName % path % data.size() % duration);
 
         stats.putTimeMs += duration;
         stats.putBytes += data.size();
@@ -422,14 +422,14 @@ struct S3BinaryCacheStoreImpl : public S3BinaryCacheStore
 };
 
 static RegisterStoreImplementation regStore([](
-    const std::string & uri, const Store::Params & params)
+        const std::string & uri, const Store::Params & params)
     -> std::shared_ptr<Store>
-{
-    if (std::string(uri, 0, 5) != "s3://") return 0;
-    auto store = std::make_shared<S3BinaryCacheStoreImpl>(params, std::string(uri, 5));
-    store->init();
-    return store;
-});
+    {
+        if (std::string(uri, 0, 5) != "s3://") return 0;
+        auto store = std::make_shared<S3BinaryCacheStoreImpl>(params, std::string(uri, 5));
+        store->init();
+        return store;
+    });
 
 }
 

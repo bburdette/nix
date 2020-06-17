@@ -12,9 +12,9 @@ static void checkName(std::string_view path, std::string_view name)
         throw BadStorePath("store path '%s' has a name longer than 211 characters", path);
     for (auto c : name)
         if (!((c >= '0' && c <= '9')
-                || (c >= 'a' && c <= 'z')
-                || (c >= 'A' && c <= 'Z')
-                || c == '+' || c == '-' || c == '.' || c == '_' || c == '?' || c == '='))
+              || (c >= 'a' && c <= 'z')
+              || (c >= 'A' && c <= 'Z')
+              || c == '+' || c == '-' || c == '.' || c == '_' || c == '?' || c == '='))
             throw BadStorePath("store path '%s' contains illegal character '%s'", path, c);
 }
 
@@ -90,7 +90,7 @@ std::pair<std::string_view, StringSet> parsePathWithOutputs(std::string_view s)
     return n == s.npos
         ? std::make_pair(s, std::set<string>())
         : std::make_pair(((std::string_view) s).substr(0, n),
-            tokenizeString<std::set<string>>(((std::string_view) s).substr(n + 1), ","));
+        tokenizeString<std::set<string>>(((std::string_view) s).substr(n + 1), ","));
 }
 
 StorePathWithOutputs Store::parsePathWithOutputs(const std::string & s)

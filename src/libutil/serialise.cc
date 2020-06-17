@@ -53,9 +53,9 @@ size_t threshold = 256 * 1024 * 1024;
 static void warnLargeDump()
 {
     logWarning({
-        .name = "Large path",
-        .description = "dumping very large path (> 256 MiB); this may run out of memory"
-    });
+            .name = "Large path",
+            .description = "dumping very large path (> 256 MiB); this may run out of memory"
+        });
 }
 
 
@@ -189,11 +189,11 @@ std::unique_ptr<Source> sinkToSource(
         {
             if (!coro)
                 coro = coro_t::pull_type([&](coro_t::push_type & yield) {
-                    LambdaSink sink([&](const unsigned char * data, size_t len) {
+                        LambdaSink sink([&](const unsigned char * data, size_t len) {
                             if (len) yield(std::string((const char *) data, len));
                         });
-                    fun(sink);
-                });
+                        fun(sink);
+                    });
 
             if (!*coro) { eof(); abort(); }
 

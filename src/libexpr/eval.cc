@@ -74,69 +74,69 @@ static void printValue(std::ostream & str, std::set<const Value *> & active, con
     }
 
     switch (v.type) {
-    case tInt:
-        str << v.integer;
-        break;
-    case tBool:
-        str << (v.boolean ? "true" : "false");
-        break;
-    case tString:
-        str << "\"";
-        for (const char * i = v.string.s; *i; i++)
-            if (*i == '\"' || *i == '\\') str << "\\" << *i;
-            else if (*i == '\n') str << "\\n";
-            else if (*i == '\r') str << "\\r";
-            else if (*i == '\t') str << "\\t";
-            else str << *i;
-        str << "\"";
-        break;
-    case tPath:
-        str << v.path; // !!! escaping?
-        break;
-    case tNull:
-        str << "null";
-        break;
-    case tAttrs: {
-        str << "{ ";
-        for (auto & i : v.attrs->lexicographicOrder()) {
-            str << i->name << " = ";
-            printValue(str, active, *i->value);
-            str << "; ";
+        case tInt:
+            str << v.integer;
+            break;
+        case tBool:
+            str << (v.boolean ? "true" : "false");
+            break;
+        case tString:
+            str << "\"";
+            for (const char * i = v.string.s; *i; i++)
+                if (*i == '\"' || *i == '\\') str << "\\" << *i;
+                else if (*i == '\n') str << "\\n";
+                else if (*i == '\r') str << "\\r";
+                else if (*i == '\t') str << "\\t";
+                else str << *i;
+            str << "\"";
+            break;
+        case tPath:
+            str << v.path; // !!! escaping?
+            break;
+        case tNull:
+            str << "null";
+            break;
+        case tAttrs: {
+            str << "{ ";
+            for (auto & i : v.attrs->lexicographicOrder()) {
+                str << i->name << " = ";
+                printValue(str, active, *i->value);
+                str << "; ";
+            }
+            str << "}";
+            break;
         }
-        str << "}";
-        break;
-    }
-    case tList1:
-    case tList2:
-    case tListN:
-        str << "[ ";
-        for (unsigned int n = 0; n < v.listSize(); ++n) {
-            printValue(str, active, *v.listElems()[n]);
-            str << " ";
-        }
-        str << "]";
-        break;
-    case tThunk:
-    case tApp:
-        str << "<CODE>";
-        break;
-    case tLambda:
-        str << "<LAMBDA>";
-        break;
-    case tPrimOp:
-        str << "<PRIMOP>";
-        break;
-    case tPrimOpApp:
-        str << "<PRIMOP-APP>";
-        break;
-    case tExternal:
-        str << *v.external;
-        break;
-    case tFloat:
-        str << v.fpoint;
-        break;
-    default:
-        throw Error("invalid value");
+        case tList1:
+        case tList2:
+        case tListN:
+            str << "[ ";
+            for (unsigned int n = 0; n < v.listSize(); ++n) {
+                printValue(str, active, *v.listElems()[n]);
+                str << " ";
+            }
+            str << "]";
+            break;
+        case tThunk:
+        case tApp:
+            str << "<CODE>";
+            break;
+        case tLambda:
+            str << "<LAMBDA>";
+            break;
+        case tPrimOp:
+            str << "<PRIMOP>";
+            break;
+        case tPrimOpApp:
+            str << "<PRIMOP-APP>";
+            break;
+        case tExternal:
+            str << *v.external;
+            break;
+        case tFloat:
+            str << v.fpoint;
+            break;
+        default:
+            throw Error("invalid value");
     }
 
     active.erase(&v);
@@ -425,9 +425,9 @@ void EvalState::checkURI(const std::string & uri)
     for (auto & prefix : evalSettings.allowedUris.get())
         if (uri == prefix ||
             (uri.size() > prefix.size()
-            && prefix.size() > 0
-            && hasPrefix(uri, prefix)
-            && (prefix[prefix.size() - 1] == '/' || uri[prefix.size()] == '/')))
+             && prefix.size() > 0
+             && hasPrefix(uri, prefix)
+             && (prefix[prefix.size() - 1] == '/' || uri[prefix.size()] == '/')))
             return;
 
     /* If the URI is a path, then check it against allowedPaths as
@@ -507,9 +507,9 @@ LocalNoInlineNoReturn(void throwEvalError(const char * s, const string & s2))
 LocalNoInlineNoReturn(void throwEvalError(const Pos & pos, const char * s, const string & s2))
 {
     throw EvalError({
-        .hint = hintfmt(s, s2),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s, s2),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInlineNoReturn(void throwEvalError(const char * s, const string & s2, const string & s3))
@@ -520,26 +520,26 @@ LocalNoInlineNoReturn(void throwEvalError(const char * s, const string & s2, con
 LocalNoInlineNoReturn(void throwEvalError(const Pos & pos, const char * s, const string & s2, const string & s3))
 {
     throw EvalError({
-        .hint = hintfmt(s, s2, s3),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s, s2, s3),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInlineNoReturn(void throwEvalError(const Pos & p1, const char * s, const Symbol & sym, const Pos & p2))
 {
     // p1 is where the error occurred; p2 is a position mentioned in the message.
     throw EvalError({
-        .hint = hintfmt(s, sym, p2),
-        .nixCode = NixCode { .errPos = p1 }
-    });
+            .hint = hintfmt(s, sym, p2),
+            .nixCode = NixCode { .errPos = p1 }
+        });
 }
 
 LocalNoInlineNoReturn(void throwTypeError(const Pos & pos, const char * s))
 {
     throw TypeError({
-        .hint = hintfmt(s),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInlineNoReturn(void throwTypeError(const char * s, const string & s1))
@@ -550,25 +550,25 @@ LocalNoInlineNoReturn(void throwTypeError(const char * s, const string & s1))
 LocalNoInlineNoReturn(void throwTypeError(const Pos & pos, const char * s, const ExprLambda & fun, const Symbol & s2))
 {
     throw TypeError({
-        .hint = hintfmt(s, fun.showNamePos(), s2),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s, fun.showNamePos(), s2),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInlineNoReturn(void throwAssertionError(const Pos & pos, const char * s, const string & s1))
 {
     throw AssertionError({
-        .hint = hintfmt(s, s1),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s, s1),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInlineNoReturn(void throwUndefinedVarError(const Pos & pos, const char * s, const string & s1))
 {
     throw UndefinedVarError({
-        .hint = hintfmt(s, s1),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt(s, s1),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 LocalNoInline(void addErrorPrefix(Error & e, const char * s, const string & s2))
@@ -618,7 +618,7 @@ void mkPath(Value & v, const char * s)
 
 inline Value * EvalState::lookupVar(Env * env, const ExprVar & var, bool noEval)
 {
-    for (size_t l = var.level; l; --l, env = env->up) ;
+    for (size_t l = var.level; l; --l, env = env->up);
 
     if (!var.fromWith) return env->values[var.displ];
 
@@ -637,7 +637,7 @@ inline Value * EvalState::lookupVar(Env * env, const ExprVar & var, bool noEval)
         }
         if (!env->prevWith)
             throwUndefinedVarError(var.pos, "undefined variable '%1%'", var.name);
-        for (size_t l = env->prevWith; l; --l, env = env->up) ;
+        for (size_t l = env->prevWith; l; --l, env = env->up);
     }
 }
 
@@ -1146,19 +1146,19 @@ void EvalState::callFunction(Value & fun, Value & arg, Value & v, const Pos & po
     }
 
     if (fun.type == tAttrs) {
-      auto found = fun.attrs->find(sFunctor);
-      if (found != fun.attrs->end()) {
-        /* fun may be allocated on the stack of the calling function,
-         * but for functors we may keep a reference, so heap-allocate
-         * a copy and use that instead.
-         */
-        auto & fun2 = *allocValue();
-        fun2 = fun;
-        /* !!! Should we use the attr pos here? */
-        Value v2;
-        callFunction(*found->value, fun2, v2, pos);
-        return callFunction(v2, arg, v, pos);
-      }
+        auto found = fun.attrs->find(sFunctor);
+        if (found != fun.attrs->end()) {
+            /* fun may be allocated on the stack of the calling function,
+             * but for functors we may keep a reference, so heap-allocate
+             * a copy and use that instead.
+             */
+            auto & fun2 = *allocValue();
+            fun2 = fun;
+            /* !!! Should we use the attr pos here? */
+            Value v2;
+            callFunction(*found->value, fun2, v2, pos);
+            return callFunction(v2, arg, v, pos);
+        }
     }
 
     if (fun.type != tLambda)
@@ -1486,25 +1486,25 @@ void EvalState::forceValueDeep(Value & v)
     std::function<void(Value & v)> recurse;
 
     recurse = [&](Value & v) {
-        if (!seen.insert(&v).second) return;
+            if (!seen.insert(&v).second) return;
 
-        forceValue(v);
+            forceValue(v);
 
-        if (v.type == tAttrs) {
-            for (auto & i : *v.attrs)
-                try {
-                    recurse(*i.value);
-                } catch (Error & e) {
-                    addErrorPrefix(e, "while evaluating the attribute '%1%' at %2%:\n", i.name, *i.pos);
-                    throw;
-                }
-        }
+            if (v.type == tAttrs) {
+                for (auto & i : *v.attrs)
+                    try {
+                        recurse(*i.value);
+                    } catch (Error & e) {
+                        addErrorPrefix(e, "while evaluating the attribute '%1%' at %2%:\n", i.name, *i.pos);
+                        throw;
+                    }
+            }
 
-        else if (v.isList()) {
-            for (size_t n = 0; n < v.listSize(); ++n)
-                recurse(*v.listElems()[n]);
-        }
-    };
+            else if (v.isList()) {
+                for (size_t n = 0; n < v.listSize(); ++n)
+                    recurse(*v.listElems()[n]);
+            }
+        };
 
     recurse(v);
 }
@@ -1914,9 +1914,9 @@ void EvalState::printStats()
 string ExternalValueBase::coerceToString(const Pos & pos, PathSet & context, bool copyMore, bool copyToStore) const
 {
     throw TypeError({
-        .hint = hintfmt("cannot coerce %1% to a string", showType()),
-        .nixCode = NixCode { .errPos = pos }
-    });
+            .hint = hintfmt("cannot coerce %1% to a string", showType()),
+            .nixCode = NixCode { .errPos = pos }
+        });
 }
 
 

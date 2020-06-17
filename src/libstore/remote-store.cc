@@ -43,16 +43,16 @@ void writeStorePaths(const Store & store, Sink & out, const StorePathSet & paths
 RemoteStore::RemoteStore(const Params & params)
     : Store(params)
     , connections(make_ref<Pool<Connection>>(
-            std::max(1, (int) maxConnections),
-            [this]() { return openConnectionWrapper(); },
-            [this](const ref<Connection> & r) {
-                return
-                    r->to.good()
-                    && r->from.good()
-                    && std::chrono::duration_cast<std::chrono::seconds>(
-                        std::chrono::steady_clock::now() - r->startTime).count() < maxConnectionAge;
-            }
-            ))
+        std::max(1, (int)maxConnections),
+        [this]() { return openConnectionWrapper(); },
+        [this](const ref<Connection> & r) {
+        return
+        r->to.good()
+        && r->from.good()
+        && std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - r->startTime).count() < maxConnectionAge;
+    }
+        ))
 {
 }
 
@@ -174,18 +174,18 @@ void RemoteStore::initConnection(Connection & conn)
 void RemoteStore::setOptions(Connection & conn)
 {
     conn.to << wopSetOptions
-       << settings.keepFailed
-       << settings.keepGoing
-       << settings.tryFallback
-       << verbosity
-       << settings.maxBuildJobs
-       << settings.maxSilentTime
-       << true
-       << (settings.verboseBuild ? lvlError : lvlVomit)
-       << 0 // obsolete log type
-       << 0 /* obsolete print build trace */
-       << settings.buildCores
-       << settings.useSubstitutes;
+            << settings.keepFailed
+            << settings.keepGoing
+            << settings.tryFallback
+            << verbosity
+            << settings.maxBuildJobs
+            << settings.maxSilentTime
+            << true
+            << (settings.verboseBuild ? lvlError : lvlVomit)
+            << 0 // obsolete log type
+            << 0 /* obsolete print build trace */
+            << settings.buildCores
+            << settings.useSubstitutes;
 
     if (GET_PROTOCOL_MINOR(conn.daemonVersion) >= 12) {
         std::map<std::string, Config::SettingInfo> overrides;
@@ -438,19 +438,19 @@ void RemoteStore::addToStore(const ValidPathInfo & info, Source & source,
         conn->to << wopImportPaths;
 
         auto source2 = sinkToSource([&](Sink & sink) {
-            sink << 1 // == path follows
+                sink << 1 // == path follows
                 ;
-            copyNAR(source, sink);
-            sink
-                << exportMagic
-                << printStorePath(info.path);
-            writeStorePaths(*this, sink, info.references);
-            sink
-                << (info.deriver ? printStorePath(*info.deriver) : "")
-                << 0 // == no legacy signature
-                << 0 // == no path follows
+                copyNAR(source, sink);
+                sink
+                    << exportMagic
+                    << printStorePath(info.path);
+                writeStorePaths(*this, sink, info.references);
+                sink
+                    << (info.deriver ? printStorePath(*info.deriver) : "")
+                    << 0 // == no legacy signature
+                    << 0 // == no path follows
                 ;
-        });
+            });
 
         conn.processStderr(0, source2.get());
 
@@ -540,10 +540,10 @@ void RemoteStore::buildPaths(const std::vector<StorePathWithOutputs> & drvPaths,
     if (GET_PROTOCOL_MINOR(conn->daemonVersion) >= 15)
         conn->to << buildMode;
     else
-        /* Old daemons did not take a 'buildMode' parameter, so we
-           need to validate it here on the client side.  */
-        if (buildMode != bmNormal)
-            throw Error("repairing or checking is not supported when building through the Nix daemon");
+    /* Old daemons did not take a 'buildMode' parameter, so we
+       need to validate it here on the client side.  */
+    if (buildMode != bmNormal)
+        throw Error("repairing or checking is not supported when building through the Nix daemon");
     conn.processStderr();
     readInt(conn->from);
 }
@@ -625,9 +625,9 @@ void RemoteStore::collectGarbage(const GCOptions & options, GCResults & results)
         << wopCollectGarbage << options.action;
     writeStorePaths(*this, conn->to, options.pathsToDelete);
     conn->to << options.ignoreLiveness
-        << options.maxFreed
+             << options.maxFreed
         /* removed options */
-        << 0 << 0 << 0;
+             << 0 << 0 << 0;
 
     conn.processStderr();
 
@@ -692,7 +692,7 @@ void RemoteStore::queryMissing(const std::vector<StorePathWithOutputs> & targets
         return;
     }
 
- fallback:
+fallback:
     return Store::queryMissing(targets, willBuild, willSubstitute,
         unknown, downloadSize, narSize);
 }
@@ -732,7 +732,7 @@ static Logger::Fields readFields(Source & from)
     Logger::Fields fields;
     size_t size = readInt(from);
     for (size_t n = 0; n < size; n++) {
-        auto type = (decltype(Logger::Field::type)) readInt(from);
+        auto type = (decltype(Logger::Field::type))readInt(from);
         if (type == Logger::Field::tInt)
             fields.push_back(readNum<uint64_t>(from));
         else if (type == Logger::Field::tString)
@@ -810,11 +810,11 @@ std::exception_ptr RemoteStore::Connection::processStderr(Sink * sink, Source * 
 static std::string uriScheme = "unix://";
 
 static RegisterStoreImplementation regStore([](
-    const std::string & uri, const Store::Params & params)
+        const std::string & uri, const Store::Params & params)
     -> std::shared_ptr<Store>
-{
-    if (std::string(uri, 0, uriScheme.size()) != uriScheme) return 0;
-    return std::make_shared<UDSRemoteStore>(std::string(uri, uriScheme.size()), params);
-});
+    {
+        if (std::string(uri, 0, uriScheme.size()) != uriScheme) return 0;
+        return std::make_shared<UDSRemoteStore>(std::string(uri, uriScheme.size()), params);
+    });
 
 }

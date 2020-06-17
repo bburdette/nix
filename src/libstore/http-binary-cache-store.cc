@@ -144,33 +144,33 @@ protected:
 
         getFileTransfer()->enqueueFileTransfer(request,
             {[callbackPtr, this](std::future<FileTransferResult> result) {
-                try {
-                    (*callbackPtr)(result.get().data);
-                } catch (FileTransferError & e) {
-                    if (e.error == FileTransfer::NotFound || e.error == FileTransfer::Forbidden)
-                        return (*callbackPtr)(std::shared_ptr<std::string>());
-                    maybeDisable();
-                    callbackPtr->rethrow();
-                } catch (...) {
-                    callbackPtr->rethrow();
-                }
-            }});
+                    try {
+                        (*callbackPtr)(result.get().data);
+                    } catch (FileTransferError & e) {
+                        if (e.error == FileTransfer::NotFound || e.error == FileTransfer::Forbidden)
+                            return (*callbackPtr)(std::shared_ptr<std::string>());
+                        maybeDisable();
+                        callbackPtr->rethrow();
+                    } catch (...) {
+                        callbackPtr->rethrow();
+                    }
+                }});
     }
 
 };
 
 static RegisterStoreImplementation regStore([](
-    const std::string & uri, const Store::Params & params)
+        const std::string & uri, const Store::Params & params)
     -> std::shared_ptr<Store>
-{
-    static bool forceHttp = getEnv("_NIX_FORCE_HTTP") == "1";
-    if (std::string(uri, 0, 7) != "http://" &&
-        std::string(uri, 0, 8) != "https://" &&
-        (!forceHttp || std::string(uri, 0, 7) != "file://"))
-        return 0;
-    auto store = std::make_shared<HttpBinaryCacheStore>(params, uri);
-    store->init();
-    return store;
-});
+    {
+        static bool forceHttp = getEnv("_NIX_FORCE_HTTP") == "1";
+        if (std::string(uri, 0, 7) != "http://" &&
+            std::string(uri, 0, 8) != "https://" &&
+            (!forceHttp || std::string(uri, 0, 7) != "file://"))
+            return 0;
+        auto store = std::make_shared<HttpBinaryCacheStore>(params, uri);
+        store->init();
+        return store;
+    });
 
 }

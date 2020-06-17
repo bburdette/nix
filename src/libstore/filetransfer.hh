@@ -12,23 +12,23 @@ namespace nix {
 struct FileTransferSettings : Config
 {
     Setting<bool> enableHttp2{this, true, "http2",
-        "Whether to enable HTTP/2 support."};
+                              "Whether to enable HTTP/2 support."};
 
     Setting<std::string> userAgentSuffix{this, "", "user-agent-suffix",
-        "String appended to the user agent in HTTP requests."};
+                                         "String appended to the user agent in HTTP requests."};
 
     Setting<size_t> httpConnections{this, 25, "http-connections",
-        "Number of parallel HTTP connections.",
-        {"binary-caches-parallel-connections"}};
+                                    "Number of parallel HTTP connections.",
+                                    {"binary-caches-parallel-connections"}};
 
     Setting<unsigned long> connectTimeout{this, 0, "connect-timeout",
-        "Timeout for connecting to servers during downloads. 0 means use curl's builtin default."};
+                                          "Timeout for connecting to servers during downloads. 0 means use curl's builtin default."};
 
     Setting<unsigned long> stalledDownloadTimeout{this, 300, "stalled-download-timeout",
-        "Timeout (in seconds) for receiving data from servers during download. Nix cancels idle downloads after this timeout's duration."};
+                                                  "Timeout (in seconds) for receiving data from servers during download. Nix cancels idle downloads after this timeout's duration."};
 
     Setting<unsigned int> tries{this, 5, "download-attempts",
-        "How often Nix will attempt to download a file before giving up."};
+                                "How often Nix will attempt to download a file before giving up."};
 };
 
 extern FileTransferSettings fileTransferSettings;

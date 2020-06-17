@@ -26,7 +26,7 @@ namespace nix {
 
    Here, the Connection object referenced by ‘conn’ is automatically
    returned to the pool when ‘conn’ goes out of scope.
-*/
+ */
 
 template <class R>
 class Pool
@@ -38,7 +38,7 @@ public:
 
     /* A function that checks whether an instance of R is still
        usable. Unusable instances are removed from the pool. */
-    typedef std::function<bool(const ref<R> &)> Validator;
+    typedef std::function<bool (const ref<R> &)> Validator;
 
 private:
 
@@ -59,7 +59,7 @@ private:
 public:
 
     Pool(size_t max = std::numeric_limits<size_t>::max(),
-        const Factory & factory = []() { return make_ref<R>(); },
+        const Factory & factory = [] () { return make_ref<R>(); },
         const Validator & validator = [](ref<R> r) { return true; })
         : factory(factory)
         , validator(validator)

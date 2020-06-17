@@ -37,37 +37,37 @@ std::unique_ptr<SSHMaster::Connection> SSHMaster::startCommand(const std::string
     options.dieWithParent = false;
 
     conn->sshPid = startProcess([&]() {
-        restoreSignals();
+            restoreSignals();
 
-        close(in.writeSide.get());
-        close(out.readSide.get());
+            close(in.writeSide.get());
+            close(out.readSide.get());
 
-        if (dup2(in.readSide.get(), STDIN_FILENO) == -1)
-            throw SysError("duping over stdin");
-        if (dup2(out.writeSide.get(), STDOUT_FILENO) == -1)
-            throw SysError("duping over stdout");
-        if (logFD != -1 && dup2(logFD, STDERR_FILENO) == -1)
-            throw SysError("duping over stderr");
+            if (dup2(in.readSide.get(), STDIN_FILENO) == -1)
+                throw SysError("duping over stdin");
+            if (dup2(out.writeSide.get(), STDOUT_FILENO) == -1)
+                throw SysError("duping over stdout");
+            if (logFD != -1 && dup2(logFD, STDERR_FILENO) == -1)
+                throw SysError("duping over stderr");
 
-        Strings args;
+            Strings args;
 
-        if (fakeSSH) {
-            args = { "bash", "-c" };
-        } else {
-            args = { "ssh", host.c_str(), "-x", "-a" };
-            addCommonSSHOpts(args);
-            if (socketPath != "")
-                args.insert(args.end(), {"-S", socketPath});
-            if (verbosity >= lvlChatty)
-                args.push_back("-v");
-        }
+            if (fakeSSH) {
+                args = { "bash", "-c" };
+            } else {
+                args = { "ssh", host.c_str(), "-x", "-a" };
+                addCommonSSHOpts(args);
+                if (socketPath != "")
+                    args.insert(args.end(), {"-S", socketPath});
+                if (verbosity >= lvlChatty)
+                    args.push_back("-v");
+            }
 
-        args.push_back(command);
-        execvp(args.begin()->c_str(), stringsToCharPtrs(args).data());
+            args.push_back(command);
+            execvp(args.begin()->c_str(), stringsToCharPtrs(args).data());
 
-        // could not exec ssh/bash
-        throw SysError("unable to execute '%s'", args.front());
-    }, options);
+            // could not exec ssh/bash
+            throw SysError("unable to execute '%s'", args.front());
+        }, options);
 
 
     in.readSide = -1;
@@ -98,25 +98,25 @@ Path SSHMaster::startMaster()
     options.dieWithParent = false;
 
     state->sshMaster = startProcess([&]() {
-        restoreSignals();
+            restoreSignals();
 
-        close(out.readSide.get());
+            close(out.readSide.get());
 
-        if (dup2(out.writeSide.get(), STDOUT_FILENO) == -1)
-            throw SysError("duping over stdout");
+            if (dup2(out.writeSide.get(), STDOUT_FILENO) == -1)
+                throw SysError("duping over stdout");
 
-        Strings args =
+            Strings args =
             { "ssh", host.c_str(), "-M", "-N", "-S", state->socketPath
-            , "-o", "LocalCommand=echo started"
-            , "-o", "PermitLocalCommand=yes"
+              , "-o", "LocalCommand=echo started"
+              , "-o", "PermitLocalCommand=yes"
             };
-        if (verbosity >= lvlChatty)
-            args.push_back("-v");
-        addCommonSSHOpts(args);
-        execvp(args.begin()->c_str(), stringsToCharPtrs(args).data());
+            if (verbosity >= lvlChatty)
+                args.push_back("-v");
+            addCommonSSHOpts(args);
+            execvp(args.begin()->c_str(), stringsToCharPtrs(args).data());
 
-        throw SysError("unable to execute '%s'", args.front());
-    }, options);
+            throw SysError("unable to execute '%s'", args.front());
+        }, options);
 
     out.writeSide = -1;
 

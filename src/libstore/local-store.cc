@@ -88,11 +88,11 @@ LocalStore::LocalStore(const Params & params)
         struct group * gr = getgrnam(settings.buildUsersGroup.get().c_str());
         if (!gr)
             logError({
-                .name = "'build-users-group' not found",
-                .hint = hintfmt(
-                    "warning: the group '%1%' specified in 'build-users-group' does not exist",
-                    settings.buildUsersGroup)
-            });
+                    .name = "'build-users-group' not found",
+                    .hint = hintfmt(
+                        "warning: the group '%1%' specified in 'build-users-group' does not exist",
+                        settings.buildUsersGroup)
+                });
         else {
             struct stat st;
             if (stat(realStoreDir.c_str(), &st))
@@ -116,9 +116,9 @@ LocalStore::LocalStore(const Params & params)
                 throw SysError("getting status of '%1%'", path);
             if (S_ISLNK(st.st_mode))
                 throw Error(
-                        "the path '%1%' is a symlink; "
-                        "this is not allowed for the Nix store and its parent directories",
-                        path);
+                    "the path '%1%' is a symlink; "
+                    "this is not allowed for the Nix store and its parent directories",
+                    path);
             path = dirOf(path);
         }
     }
@@ -160,7 +160,7 @@ LocalStore::LocalStore(const Params & params)
     int curSchema = getSchema();
     if (curSchema > nixSchemaVersion)
         throw Error("current Nix store schema is version %1%, but I only support %2%",
-             curSchema, nixSchemaVersion);
+            curSchema, nixSchemaVersion);
 
     else if (curSchema == 0) { /* new store */
         curSchema = nixSchemaVersion;
@@ -349,7 +349,7 @@ void LocalStore::openDB(State & state, bool create)
     if (create) {
         static const char schema[] =
 #include "schema.sql.gen.hh"
-            ;
+        ;
         db.exec(schema);
     }
 }
@@ -389,8 +389,8 @@ static void canonicaliseTimestampAndPermissions(const Path & path, const struct 
 
         if (mode != 0444 && mode != 0555) {
             mode = (st.st_mode & S_IFMT)
-                 | 0444
-                 | (st.st_mode & S_IXUSR ? 0111 : 0);
+                | 0444
+                | (st.st_mode & S_IXUSR ? 0111 : 0);
             if (chmod(path.c_str(), mode) == -1)
                 throw SysError("changing mode of '%1%' to %2$o", path, mode);
         }
@@ -410,7 +410,7 @@ static void canonicaliseTimestampAndPermissions(const Path & path, const struct 
 #else
         if (!S_ISLNK(st.st_mode) && utimes(path.c_str(), times) == -1)
 #endif
-            throw SysError("changing modification time of '%1%'", path);
+                throw SysError("changing modification time of '%1%'", path);
     }
 }
 
@@ -466,7 +466,7 @@ static void canonicalisePathMetaData_(const Path & path, uid_t fromUid, InodesSe
             if (lremovexattr(path.c_str(), eaName.c_str()) == -1)
                 throw SysError("removing extended attribute '%s' from '%s'", eaName, path);
         }
-     }
+    }
 #endif
 
     /* Fail if the file is not owned by the build user.  This prevents
@@ -503,7 +503,7 @@ static void canonicalisePathMetaData_(const Path & path, uid_t fromUid, InodesSe
             chown(path.c_str(), geteuid(), getegid()) == -1)
 #endif
             throw SysError("changing owner of '%1%' to %2%",
-                path, geteuid());
+            path, geteuid());
     }
 
     if (S_ISDIR(st.st_mode)) {
@@ -545,15 +545,15 @@ void LocalStore::checkDerivationOutputs(const StorePath & drvPath, const Derivat
     drvName = string(drvName, 0, drvName.size() - drvExtension.size());
 
     auto check = [&](const StorePath & expected, const StorePath & actual, const std::string & varName)
-    {
-        if (actual != expected)
-            throw Error("derivation '%s' has incorrect output '%s', should be '%s'",
-                printStorePath(drvPath), printStorePath(actual), printStorePath(expected));
-        auto j = drv.env.find(varName);
-        if (j == drv.env.end() || parseStorePath(j->second) != actual)
-            throw Error("derivation '%s' has incorrect environment variable '%s', should be '%s'",
-                printStorePath(drvPath), varName, printStorePath(actual));
-    };
+        {
+            if (actual != expected)
+                throw Error("derivation '%s' has incorrect output '%s', should be '%s'",
+                    printStorePath(drvPath), printStorePath(actual), printStorePath(expected));
+            auto j = drv.env.find(varName);
+            if (j == drv.env.end() || parseStorePath(j->second) != actual)
+                throw Error("derivation '%s' has incorrect environment variable '%s', should be '%s'",
+                    printStorePath(drvPath), varName, printStorePath(actual));
+        };
 
 
     if (drv.isFixedOutput()) {
@@ -591,7 +591,7 @@ uint64_t LocalStore::addValidPath(State & state,
         (info.ultimate ? 1 : 0, info.ultimate)
         (concatStringsSep(" ", info.sigs), !info.sigs.empty())
         (info.ca, !info.ca.empty())
-        .exec();
+    .exec();
     uint64_t id = sqlite3_last_insert_rowid(state.db);
 
     /* If this is a derivation, then store the derivation outputs in
@@ -613,7 +613,7 @@ uint64_t LocalStore::addValidPath(State & state,
                 (id)
                 (i.first)
                 (printStorePath(i.second.path))
-                .exec();
+            .exec();
         }
     }
 
@@ -634,46 +634,46 @@ void LocalStore::queryPathInfoUncached(const StorePath & path,
         auto info = std::make_shared<ValidPathInfo>(path);
 
         callback(retrySQLite<std::shared_ptr<ValidPathInfo>>([&]() {
-            auto state(_state.lock());
+                auto state(_state.lock());
 
-            /* Get the path info. */
-            auto useQueryPathInfo(state->stmtQueryPathInfo.use()(printStorePath(info->path)));
+                /* Get the path info. */
+                auto useQueryPathInfo(state->stmtQueryPathInfo.use()(printStorePath(info->path)));
 
-            if (!useQueryPathInfo.next())
-                return std::shared_ptr<ValidPathInfo>();
+                if (!useQueryPathInfo.next())
+                    return std::shared_ptr<ValidPathInfo>();
 
-            info->id = useQueryPathInfo.getInt(0);
+                info->id = useQueryPathInfo.getInt(0);
 
-            try {
-                info->narHash = Hash(useQueryPathInfo.getStr(1));
-            } catch (BadHash & e) {
-                throw Error("in valid-path entry for '%s': %s", printStorePath(path), e.what());
-            }
+                try {
+                    info->narHash = Hash(useQueryPathInfo.getStr(1));
+                } catch (BadHash & e) {
+                    throw Error("in valid-path entry for '%s': %s", printStorePath(path), e.what());
+                }
 
-            info->registrationTime = useQueryPathInfo.getInt(2);
+                info->registrationTime = useQueryPathInfo.getInt(2);
 
-            auto s = (const char *) sqlite3_column_text(state->stmtQueryPathInfo, 3);
-            if (s) info->deriver = parseStorePath(s);
+                auto s = (const char *) sqlite3_column_text(state->stmtQueryPathInfo, 3);
+                if (s) info->deriver = parseStorePath(s);
 
-            /* Note that narSize = NULL yields 0. */
-            info->narSize = useQueryPathInfo.getInt(4);
+                /* Note that narSize = NULL yields 0. */
+                info->narSize = useQueryPathInfo.getInt(4);
 
-            info->ultimate = useQueryPathInfo.getInt(5) == 1;
+                info->ultimate = useQueryPathInfo.getInt(5) == 1;
 
-            s = (const char *) sqlite3_column_text(state->stmtQueryPathInfo, 6);
-            if (s) info->sigs = tokenizeString<StringSet>(s, " ");
+                s = (const char *) sqlite3_column_text(state->stmtQueryPathInfo, 6);
+                if (s) info->sigs = tokenizeString<StringSet>(s, " ");
 
-            s = (const char *) sqlite3_column_text(state->stmtQueryPathInfo, 7);
-            if (s) info->ca = s;
+                s = (const char *) sqlite3_column_text(state->stmtQueryPathInfo, 7);
+                if (s) info->ca = s;
 
-            /* Get the references. */
-            auto useQueryReferences(state->stmtQueryReferences.use()(info->id));
+                /* Get the references. */
+                auto useQueryReferences(state->stmtQueryReferences.use()(info->id));
 
-            while (useQueryReferences.next())
-                info->references.insert(parseStorePath(useQueryReferences.getStr(0)));
+                while (useQueryReferences.next())
+                    info->references.insert(parseStorePath(useQueryReferences.getStr(0)));
 
-            return info;
-        }));
+                return info;
+            }));
 
     } catch (...) { callback.rethrow(); }
 }
@@ -689,7 +689,7 @@ void LocalStore::updatePathInfo(State & state, const ValidPathInfo & info)
         (concatStringsSep(" ", info.sigs), !info.sigs.empty())
         (info.ca, !info.ca.empty())
         (printStorePath(info.path))
-        .exec();
+    .exec();
 }
 
 
@@ -711,9 +711,9 @@ bool LocalStore::isValidPath_(State & state, const StorePath & path)
 bool LocalStore::isValidPathUncached(const StorePath & path)
 {
     return retrySQLite<bool>([&]() {
-        auto state(_state.lock());
-        return isValidPath_(*state, path);
-    });
+            auto state(_state.lock());
+            return isValidPath_(*state, path);
+        });
 }
 
 
@@ -729,12 +729,12 @@ StorePathSet LocalStore::queryValidPaths(const StorePathSet & paths, SubstituteF
 StorePathSet LocalStore::queryAllValidPaths()
 {
     return retrySQLite<StorePathSet>([&]() {
-        auto state(_state.lock());
-        auto use(state->stmtQueryValidPaths.use());
-        StorePathSet res;
-        while (use.next()) res.insert(parseStorePath(use.getStr(0)));
-        return res;
-    });
+            auto state(_state.lock());
+            auto use(state->stmtQueryValidPaths.use());
+            StorePathSet res;
+            while (use.next()) res.insert(parseStorePath(use.getStr(0)));
+            return res;
+        });
 }
 
 
@@ -750,42 +750,42 @@ void LocalStore::queryReferrers(State & state, const StorePath & path, StorePath
 void LocalStore::queryReferrers(const StorePath & path, StorePathSet & referrers)
 {
     return retrySQLite<void>([&]() {
-        auto state(_state.lock());
-        queryReferrers(*state, path, referrers);
-    });
+            auto state(_state.lock());
+            queryReferrers(*state, path, referrers);
+        });
 }
 
 
 StorePathSet LocalStore::queryValidDerivers(const StorePath & path)
 {
     return retrySQLite<StorePathSet>([&]() {
-        auto state(_state.lock());
+            auto state(_state.lock());
 
-        auto useQueryValidDerivers(state->stmtQueryValidDerivers.use()(printStorePath(path)));
+            auto useQueryValidDerivers(state->stmtQueryValidDerivers.use()(printStorePath(path)));
 
-        StorePathSet derivers;
-        while (useQueryValidDerivers.next())
-            derivers.insert(parseStorePath(useQueryValidDerivers.getStr(1)));
+            StorePathSet derivers;
+            while (useQueryValidDerivers.next())
+                derivers.insert(parseStorePath(useQueryValidDerivers.getStr(1)));
 
-        return derivers;
-    });
+            return derivers;
+        });
 }
 
 
 StorePathSet LocalStore::queryDerivationOutputs(const StorePath & path)
 {
     return retrySQLite<StorePathSet>([&]() {
-        auto state(_state.lock());
+            auto state(_state.lock());
 
-        auto useQueryDerivationOutputs(state->stmtQueryDerivationOutputs.use()
-            (queryValidPathId(*state, path)));
+            auto useQueryDerivationOutputs(state->stmtQueryDerivationOutputs.use()
+                    (queryValidPathId(*state, path)));
 
-        StorePathSet outputs;
-        while (useQueryDerivationOutputs.next())
-            outputs.insert(parseStorePath(useQueryDerivationOutputs.getStr(1)));
+            StorePathSet outputs;
+            while (useQueryDerivationOutputs.next())
+                outputs.insert(parseStorePath(useQueryDerivationOutputs.getStr(1)));
 
-        return outputs;
-    });
+            return outputs;
+        });
 }
 
 
@@ -796,17 +796,17 @@ std::optional<StorePath> LocalStore::queryPathFromHashPart(const std::string & h
     Path prefix = storeDir + "/" + hashPart;
 
     return retrySQLite<std::optional<StorePath>>([&]() -> std::optional<StorePath> {
-        auto state(_state.lock());
+            auto state(_state.lock());
 
-        auto useQueryPathFromHashPart(state->stmtQueryPathFromHashPart.use()(prefix));
+            auto useQueryPathFromHashPart(state->stmtQueryPathFromHashPart.use()(prefix));
 
-        if (!useQueryPathFromHashPart.next()) return {};
+            if (!useQueryPathFromHashPart.next()) return {};
 
-        const char * s = (const char *) sqlite3_column_text(state->stmtQueryPathFromHashPart, 0);
-        if (s && prefix.compare(0, prefix.size(), s, prefix.size()) == 0)
-            return parseStorePath(s);
-        return {};
-    });
+            const char * s = (const char *) sqlite3_column_text(state->stmtQueryPathFromHashPart, 0);
+            if (s && prefix.compare(0, prefix.size(), s, prefix.size()) == 0)
+                return parseStorePath(s);
+            return {};
+        });
 }
 
 
@@ -855,10 +855,10 @@ void LocalStore::querySubstitutablePathInfos(const StorePathSet & paths,
                 auto narInfo = std::dynamic_pointer_cast<const NarInfo>(
                     std::shared_ptr<const ValidPathInfo>(info));
                 infos.insert_or_assign(path, SubstitutablePathInfo{
-                    info->deriver,
-                    info->references,
-                    narInfo ? narInfo->fileSize : 0,
-                    info->narSize});
+                        info->deriver,
+                        info->references,
+                        narInfo ? narInfo->fileSize : 0,
+                        info->narSize});
             } catch (InvalidPath &) {
             } catch (SubstituterDisabled &) {
             } catch (Error & e) {
@@ -889,43 +889,43 @@ void LocalStore::registerValidPaths(const ValidPathInfos & infos)
     if (settings.syncBeforeRegistering) sync();
 
     return retrySQLite<void>([&]() {
-        auto state(_state.lock());
+            auto state(_state.lock());
 
-        SQLiteTxn txn(state->db);
-        StorePathSet paths;
+            SQLiteTxn txn(state->db);
+            StorePathSet paths;
 
-        for (auto & i : infos) {
-            assert(i.narHash.type == htSHA256);
-            if (isValidPath_(*state, i.path))
-                updatePathInfo(*state, i);
-            else
-                addValidPath(*state, i, false);
-            paths.insert(i.path);
-        }
-
-        for (auto & i : infos) {
-            auto referrer = queryValidPathId(*state, i.path);
-            for (auto & j : i.references)
-                state->stmtAddReference.use()(referrer)(queryValidPathId(*state, j)).exec();
-        }
-
-        /* Check that the derivation outputs are correct.  We can't do
-           this in addValidPath() above, because the references might
-           not be valid yet. */
-        for (auto & i : infos)
-            if (i.path.isDerivation()) {
-                // FIXME: inefficient; we already loaded the derivation in addValidPath().
-                checkDerivationOutputs(i.path, readDerivation(i.path));
+            for (auto & i : infos) {
+                assert(i.narHash.type == htSHA256);
+                if (isValidPath_(*state, i.path))
+                    updatePathInfo(*state, i);
+                else
+                    addValidPath(*state, i, false);
+                paths.insert(i.path);
             }
 
-        /* Do a topological sort of the paths.  This will throw an
-           error if a cycle is detected and roll back the
-           transaction.  Cycles can only occur when a derivation
-           has multiple outputs. */
-        topoSortPaths(paths);
+            for (auto & i : infos) {
+                auto referrer = queryValidPathId(*state, i.path);
+                for (auto & j : i.references)
+                    state->stmtAddReference.use()(referrer)(queryValidPathId(*state, j)).exec();
+            }
 
-        txn.commit();
-    });
+            /* Check that the derivation outputs are correct.  We can't do
+               this in addValidPath() above, because the references might
+               not be valid yet. */
+            for (auto & i : infos)
+                if (i.path.isDerivation()) {
+                    // FIXME: inefficient; we already loaded the derivation in addValidPath().
+                    checkDerivationOutputs(i.path, readDerivation(i.path));
+                }
+
+            /* Do a topological sort of the paths.  This will throw an
+               error if a cycle is detected and roll back the
+               transaction.  Cycles can only occur when a derivation
+               has multiple outputs. */
+            topoSortPaths(paths);
+
+            txn.commit();
+        });
 }
 
 
@@ -985,7 +985,7 @@ void LocalStore::addToStore(const ValidPathInfo & info, Source & source,
 
             if (info.ca != "" &&
                 !((hasPrefix(info.ca, "text:") && !info.references.count(info.path))
-                    || info.references.empty()))
+                  || info.references.empty()))
                 settings.requireExperimentalFeature("ca-references");
 
             /* While restoring the path from the NAR, compute the hash
@@ -997,10 +997,10 @@ void LocalStore::addToStore(const ValidPathInfo & info, Source & source,
                 hashSink = std::make_unique<HashModuloSink>(htSHA256, std::string(info.path.hashPart()));
 
             LambdaSource wrapperSource([&](unsigned char * data, size_t len) -> size_t {
-                size_t n = source.read(data, len);
-                (*hashSink)(data, n);
-                return n;
-            });
+                    size_t n = source.read(data, len);
+                    (*hashSink)(data, n);
+                    return n;
+                });
 
             restorePath(realPath, wrapperSource);
 
@@ -1171,21 +1171,21 @@ Path LocalStore::createTempDirInStore()
 void LocalStore::invalidatePathChecked(const StorePath & path)
 {
     retrySQLite<void>([&]() {
-        auto state(_state.lock());
+            auto state(_state.lock());
 
-        SQLiteTxn txn(state->db);
+            SQLiteTxn txn(state->db);
 
-        if (isValidPath_(*state, path)) {
-            StorePathSet referrers; queryReferrers(*state, path, referrers);
-            referrers.erase(path); /* ignore self-references */
-            if (!referrers.empty())
-                throw PathInUse("cannot delete path '%s' because it is in use by %s",
-                    printStorePath(path), showPaths(referrers));
-            invalidatePath(*state, path);
-        }
+            if (isValidPath_(*state, path)) {
+                StorePathSet referrers; queryReferrers(*state, path, referrers);
+                referrers.erase(path); /* ignore self-references */
+                if (!referrers.empty())
+                    throw PathInUse("cannot delete path '%s' because it is in use by %s",
+                        printStorePath(path), showPaths(referrers));
+                invalidatePath(*state, path);
+            }
 
-        txn.commit();
-    });
+            txn.commit();
+        });
 }
 
 
@@ -1224,11 +1224,11 @@ bool LocalStore::verifyStore(bool checkContents, RepairFlag repair)
             string hash = hashPath(htSHA256, linkPath).first.to_string(Base32, false);
             if (hash != link.name) {
                 logError({
-                    .name = "Invalid hash",
-                    .hint = hintfmt(
-                        "link '%s' was modified! expected hash '%s', got '%s'",
-                        linkPath, link.name, hash)
-                });
+                        .name = "Invalid hash",
+                        .hint = hintfmt(
+                            "link '%s' was modified! expected hash '%s', got '%s'",
+                            linkPath, link.name, hash)
+                    });
                 if (repair) {
                     if (unlink(linkPath.c_str()) == 0)
                         printInfo("removed link '%s'", linkPath);
@@ -1262,10 +1262,10 @@ bool LocalStore::verifyStore(bool checkContents, RepairFlag repair)
 
                 if (info->narHash != nullHash && info->narHash != current.first) {
                     logError({
-                        .name = "Invalid hash - path modified",
-                        .hint = hintfmt("path '%s' was modified! expected hash '%s', got '%s'",
-                        printStorePath(i), info->narHash.to_string(Base32, true), current.first.to_string(Base32, true))
-                    });
+                            .name = "Invalid hash - path modified",
+                            .hint = hintfmt("path '%s' was modified! expected hash '%s', got '%s'",
+                                printStorePath(i), info->narHash.to_string(Base32, true), current.first.to_string(Base32, true))
+                        });
                     if (repair) repairPath(i); else errors = true;
                 } else {
 
@@ -1317,9 +1317,9 @@ void LocalStore::verifyPath(const Path & pathS, const StringSet & store,
 
     if (!isStorePath(pathS)) {
         logError({
-            .name = "Nix path not found",
-            .hint = hintfmt("path '%s' is not in the Nix store", pathS)
-        });
+                .name = "Nix path not found",
+                .hint = hintfmt("path '%s' is not in the Nix store", pathS)
+            });
         return;
     }
 
@@ -1343,9 +1343,9 @@ void LocalStore::verifyPath(const Path & pathS, const StringSet & store,
             invalidatePath(*state, path);
         } else {
             logError({
-                .name = "Missing path with referrers",
-                .hint = hintfmt("path '%s' disappeared, but it still has valid referrers!", pathS)
-            });
+                    .name = "Missing path with referrers",
+                    .hint = hintfmt("path '%s' disappeared, but it still has valid referrers!", pathS)
+                });
             if (repair)
                 try {
                     repairPath(path);
@@ -1431,18 +1431,18 @@ void LocalStore::vacuumDB()
 void LocalStore::addSignatures(const StorePath & storePath, const StringSet & sigs)
 {
     retrySQLite<void>([&]() {
-        auto state(_state.lock());
+            auto state(_state.lock());
 
-        SQLiteTxn txn(state->db);
+            SQLiteTxn txn(state->db);
 
-        auto info = std::const_pointer_cast<ValidPathInfo>(std::shared_ptr<const ValidPathInfo>(queryPathInfo(storePath)));
+            auto info = std::const_pointer_cast<ValidPathInfo>(std::shared_ptr<const ValidPathInfo>(queryPathInfo(storePath)));
 
-        info->sigs.insert(sigs.begin(), sigs.end());
+            info->sigs.insert(sigs.begin(), sigs.end());
 
-        updatePathInfo(*state, *info);
+            updatePathInfo(*state, *info);
 
-        txn.commit();
-    });
+            txn.commit();
+        });
 }
 
 
@@ -1462,9 +1462,9 @@ void LocalStore::signPathInfo(ValidPathInfo & info)
 void LocalStore::createUser(const std::string & userName, uid_t userId)
 {
     for (auto & dir : {
-        fmt("%s/profiles/per-user/%s", stateDir, userName),
-        fmt("%s/gcroots/per-user/%s", stateDir, userName)
-    }) {
+            fmt("%s/profiles/per-user/%s", stateDir, userName),
+            fmt("%s/gcroots/per-user/%s", stateDir, userName)
+        }) {
         createDirs(dir);
         if (chmod(dir.c_str(), 0755) == -1)
             throw SysError("changing permissions of directory '%s'", dir);

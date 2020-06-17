@@ -58,7 +58,7 @@ static void sigChldHandler(int sigNo)
     // Ensure we don't modify errno of whatever we've interrupted
     auto saved_errno = errno;
     //  Reap all dead children.
-    while (waitpid(-1, 0, WNOHANG) > 0) ;
+    while (waitpid(-1, 0, WNOHANG) > 0);
     errno = saved_errno;
 }
 

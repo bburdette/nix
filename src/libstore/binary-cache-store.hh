@@ -21,7 +21,7 @@ public:
     const Setting<Path> secretKeyFile{this, "", "secret-key", "path to secret key used to sign the binary cache"};
     const Setting<Path> localNarCache{this, "", "local-nar-cache", "path to a local cache of NARs"};
     const Setting<bool> parallelCompression{this, false, "parallel-compression",
-        "enable multi-threading compression, available for xz only currently"};
+                                            "enable multi-threading compression, available for xz only currently"};
 
 private:
 

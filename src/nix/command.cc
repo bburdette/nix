@@ -36,17 +36,17 @@ StorePathsCommand::StorePathsCommand(bool recursive)
 {
     if (recursive)
         addFlag({
-            .longName = "no-recursive",
-            .description = "apply operation to specified paths only",
-            .handler = {&this->recursive, false},
-        });
+                .longName = "no-recursive",
+                .description = "apply operation to specified paths only",
+                .handler = {&this->recursive, false},
+            });
     else
         addFlag({
-            .longName = "recursive",
-            .shortName = 'r',
-            .description = "apply operation to closure of the specified paths",
-            .handler = {&this->recursive, true},
-        });
+                .longName = "recursive",
+                .shortName = 'r',
+                .description = "apply operation to closure of the specified paths",
+                .handler = {&this->recursive, true},
+            });
 
     mkFlag(0, "all", "apply operation to the entire store", &all);
 }
@@ -93,9 +93,9 @@ Strings editorFor(const Pos & pos)
     auto editor = getEnv("EDITOR").value_or("cat");
     auto args = tokenizeString<Strings>(editor);
     if (pos.line > 0 && (
-        editor.find("emacs") != std::string::npos ||
-        editor.find("nano") != std::string::npos ||
-        editor.find("vim") != std::string::npos))
+            editor.find("emacs") != std::string::npos ||
+            editor.find("nano") != std::string::npos ||
+            editor.find("vim") != std::string::npos))
         args.push_back(fmt("+%d", pos.line));
     args.push_back(pos.file);
     return args;
@@ -104,11 +104,11 @@ Strings editorFor(const Pos & pos)
 MixProfile::MixProfile()
 {
     addFlag({
-        .longName = "profile",
-        .description = "profile to update",
-        .labels = {"path"},
-        .handler = {&profile},
-    });
+            .longName = "profile",
+            .description = "profile to update",
+            .labels = {"path"},
+            .handler = {&profile},
+        });
 }
 
 void MixProfile::updateProfile(const StorePath & storePath)
@@ -151,27 +151,27 @@ MixDefaultProfile::MixDefaultProfile()
 MixEnvironment::MixEnvironment() : ignoreEnvironment(false)
 {
     addFlag({
-        .longName = "ignore-environment",
-        .shortName = 'i',
-        .description = "clear the entire environment (except those specified with --keep)",
-        .handler = {&ignoreEnvironment, true},
-    });
+            .longName = "ignore-environment",
+            .shortName = 'i',
+            .description = "clear the entire environment (except those specified with --keep)",
+            .handler = {&ignoreEnvironment, true},
+        });
 
     addFlag({
-        .longName = "keep",
-        .shortName = 'k',
-        .description = "keep specified environment variable",
-        .labels = {"name"},
-        .handler = {[&](std::string s) { keep.insert(s); }},
-    });
+            .longName = "keep",
+            .shortName = 'k',
+            .description = "keep specified environment variable",
+            .labels = {"name"},
+            .handler = {[&](std::string s) { keep.insert(s); }},
+        });
 
     addFlag({
-        .longName = "unset",
-        .shortName = 'u',
-        .description = "unset specified environment variable",
-        .labels = {"name"},
-        .handler = {[&](std::string s) { unset.insert(s); }},
-    });
+            .longName = "unset",
+            .shortName = 'u',
+            .description = "unset specified environment variable",
+            .labels = {"name"},
+            .handler = {[&](std::string s) { unset.insert(s); }},
+        });
 }
 
 void MixEnvironment::setEnviron() {

@@ -31,7 +31,7 @@ struct MixLs : virtual Args, MixJSON
                 auto st = accessor->stat(curPath);
                 std::string tp =
                     st.type == FSAccessor::Type::tRegular ?
-                        (st.isExecutable ? "-r-xr-xr-x" : "-r--r--r--") :
+                    (st.isExecutable ? "-r-xr-xr-x" : "-r--r--r--") :
                     st.type == FSAccessor::Type::tSymlink ? "lrwxrwxrwx" :
                     "dr-xr-xr-x";
                 auto line = fmt("%s %20d %s", tp, st.fileSize, relPath);
@@ -51,7 +51,7 @@ struct MixLs : virtual Args, MixJSON
         };
 
         doPath = [&](const FSAccessor::Stat & st, const Path & curPath,
-            const std::string & relPath, bool showDirectory)
+                     const std::string & relPath, bool showDirectory)
         {
             if (st.type == FSAccessor::Type::tDirectory && !showDirectory) {
                 auto names = accessor->readDirectory(curPath);

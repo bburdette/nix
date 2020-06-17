@@ -25,10 +25,10 @@ struct CmdHash : Command
         addFlag(Flag::mkHashTypeFlag("type", &ht));
         #if 0
         mkFlag()
-            .longName("modulo")
-            .description("compute hash modulo specified string")
-            .labels({"modulus"})
-            .dest(&modulus);
+        .longName("modulo")
+        .description("compute hash modulo specified string")
+        .labels({"modulus"})
+        .dest(&modulus);
         #endif
         expectArgs("paths", &paths);
     }
@@ -37,10 +37,10 @@ struct CmdHash : Command
     {
         const char* d;
         switch (mode) {
-        case FileIngestionMethod::Flat:
-            d = "print cryptographic hash of a regular file";
-        case FileIngestionMethod::Recursive:
-            d = "print cryptographic hash of the NAR serialisation of a path";
+            case FileIngestionMethod::Flat:
+                d = "print cryptographic hash of a regular file";
+            case FileIngestionMethod::Recursive:
+                d = "print cryptographic hash of the NAR serialisation of a path";
         };
         return d;
     }
@@ -58,12 +58,12 @@ struct CmdHash : Command
                 hashSink = std::make_unique<HashSink>(ht);
 
             switch (mode) {
-            case FileIngestionMethod::Flat:
-                readFile(path, *hashSink);
-                break;
-            case FileIngestionMethod::Recursive:
-                dumpPath(path, *hashSink);
-                break;
+                case FileIngestionMethod::Flat:
+                    readFile(path, *hashSink);
+                    break;
+                case FileIngestionMethod::Recursive:
+                    dumpPath(path, *hashSink);
+                    break;
             }
 
             Hash h = hashSink->finish().first;

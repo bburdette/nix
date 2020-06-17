@@ -65,7 +65,7 @@ struct GCOptions
 
        - `gcDeleteSpecific': delete the paths listed in
           `pathsToDelete', insofar as they are not reachable.
-    */
+     */
     typedef enum {
         gcReturnLive,
         gcReturnDead,
@@ -148,12 +148,12 @@ struct ValidPathInfo
        multiple hash algorithms and serialisation methods (flat file
        vs NAR). Thus, ‘ca’ has one of the following forms:
 
-       * ‘text:sha256:<sha256 hash of file contents>’: For paths
+     * ‘text:sha256:<sha256 hash of file contents>’: For paths
          computed by makeTextPath() / addTextToStore().
 
-       * ‘fixed:<r?>:<ht>:<h>’: For paths computed by
+     * ‘fixed:<r?>:<ht>:<h>’: For paths computed by
          makeFixedOutputPath() / addToStore().
-    */
+     */
     std::string ca;
 
     bool operator == (const ValidPathInfo & i) const
@@ -250,7 +250,7 @@ public:
     typedef std::map<std::string, std::string> Params;
 
     const PathSetting storeDir_{this, false, settings.nixStore,
-        "store", "path to the Nix store"};
+                                "store", "path to the Nix store"};
     const Path storeDir = storeDir_;
 
     const Setting<int> pathInfoCacheSize{this, 65536, "path-info-cache-size", "size of the in-memory store path information cache"};
@@ -277,7 +277,7 @@ protected:
         // Past tense, because a path can only be assumed to exists when
         // isKnownNow() && didExist()
         inline bool didExist() {
-          return value != nullptr;
+            return value != nullptr;
         }
     };
 
@@ -517,7 +517,7 @@ public:
 
        - The collector is already running, and so we block until the
          collector is finished.  The collector will know about our
-         *temporary* locks, which should include whatever it is we
+     * temporary* locks, which should include whatever it is we
          want to register as a permanent lock.
 
        - The collector isn't running, or it's just started but hasn't
@@ -701,13 +701,13 @@ public:
     // it to omit the call to the Setting constructor. Clang works fine
     // either way.
     const PathSetting rootDir{(Store*) this, true, "",
-        "root", "directory prefixed to all other paths"};
+                              "root", "directory prefixed to all other paths"};
     const PathSetting stateDir{(Store*) this, false,
-        rootDir != "" ? rootDir + "/nix/var/nix" : settings.nixStateDir,
-        "state", "directory where Nix will store state"};
+                               rootDir != "" ? rootDir + "/nix/var/nix" : settings.nixStateDir,
+                               "state", "directory where Nix will store state"};
     const PathSetting logDir{(Store*) this, false,
-        rootDir != "" ? rootDir + "/nix/var/log/nix" : settings.nixLogDir,
-        "log", "directory where Nix will store state"};
+                             rootDir != "" ? rootDir + "/nix/var/log/nix" : settings.nixLogDir,
+                             "log", "directory where Nix will store state"};
 
     const static string drvsLogDir;
 
@@ -765,32 +765,32 @@ void removeTempRoots();
 /* Return a Store object to access the Nix store denoted by
    ‘uri’ (slight misnomer...). Supported values are:
 
-   * ‘local’: The Nix store in /nix/store and database in
+ * ‘local’: The Nix store in /nix/store and database in
      /nix/var/nix/db, accessed directly.
 
-   * ‘daemon’: The Nix store accessed via a Unix domain socket
+ * ‘daemon’: The Nix store accessed via a Unix domain socket
      connection to nix-daemon.
 
-   * ‘unix://<path>’: The Nix store accessed via a Unix domain socket
+ * ‘unix://<path>’: The Nix store accessed via a Unix domain socket
      connection to nix-daemon, with the socket located at <path>.
 
-   * ‘auto’ or ‘’: Equivalent to ‘local’ or ‘daemon’ depending on
+ * ‘auto’ or ‘’: Equivalent to ‘local’ or ‘daemon’ depending on
      whether the user has write access to the local Nix
      store/database.
 
-   * ‘file://<path>’: A binary cache stored in <path>.
+ * ‘file://<path>’: A binary cache stored in <path>.
 
-   * ‘https://<path>’: A binary cache accessed via HTTP.
+ * ‘https://<path>’: A binary cache accessed via HTTP.
 
-   * ‘s3://<path>’: A writable binary cache stored on Amazon's Simple
+ * ‘s3://<path>’: A writable binary cache stored on Amazon's Simple
      Storage Service.
 
-   * ‘ssh://[user@]<host>’: A remote Nix store accessed by running
+ * ‘ssh://[user@]<host>’: A remote Nix store accessed by running
      ‘nix-store --serve’ via SSH.
 
    You can pass parameters to the store implementation by appending
    ‘?key=value&key=value&...’ to the URI.
-*/
+ */
 ref<Store> openStore(const std::string & uri = settings.storeUri.get(),
     const Store::Params & extraParams = Store::Params());
 
@@ -812,7 +812,7 @@ std::list<ref<Store>> getDefaultSubstituters();
 
 /* Store implementation registration. */
 typedef std::function<std::shared_ptr<Store>(
-    const std::string & uri, const Store::Params & params)> OpenStore;
+        const std::string & uri, const Store::Params & params)> OpenStore;
 
 struct RegisterStoreImplementation
 {

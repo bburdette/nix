@@ -94,9 +94,9 @@ struct Slice
 
 struct StringSlice : Slice<char>
 {
-    StringSlice(const std::string & s): Slice(s.data(), s.size()) {}
-    explicit StringSlice(std::string_view s): Slice(s.data(), s.size()) {}
-    StringSlice(const char * s): Slice(s, strlen(s)) {}
+    StringSlice(const std::string & s) : Slice(s.data(), s.size()) {}
+    explicit StringSlice(std::string_view s) : Slice(s.data(), s.size()) {}
+    StringSlice(const char * s) : Slice(s, strlen(s)) {}
 
     operator std::string_view() const
     {
@@ -108,8 +108,8 @@ struct StringSlice : Slice<char>
 struct String;
 
 extern "C" {
-    void ffi_String_new(StringSlice s, String * out);
-    void ffi_String_drop(void * s);
+void ffi_String_new(StringSlice s, String * out);
+void ffi_String_drop(void * s);
 }
 
 struct String : Vec<char, ffi_String_drop>

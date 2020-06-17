@@ -85,9 +85,9 @@ struct GitHubInput : Input
         input->rev = *rev;
 
         Attrs immutableAttrs({
-            {"type", "git-tarball"},
-            {"rev", rev->gitRev()},
-        });
+                {"type", "git-tarball"},
+                {"rev", rev->gitRev()},
+            });
 
         if (auto res = getCache()->lookup(store, immutableAttrs)) {
             return {
@@ -190,6 +190,6 @@ struct GitHubInputScheme : InputScheme
     }
 };
 
-static auto r1 = OnStartup([] { registerInputScheme(std::make_unique<GitHubInputScheme>()); });
+static auto r1 = OnStartup([]{ registerInputScheme(std::make_unique<GitHubInputScheme>()); });
 
 }

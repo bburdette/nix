@@ -70,12 +70,12 @@ void BinaryCacheStore::getFile(const std::string & path, Sink & sink)
     std::promise<std::shared_ptr<std::string>> promise;
     getFile(path,
         {[&](std::future<std::shared_ptr<std::string>> result) {
-            try {
-                promise.set_value(result.get());
-            } catch (...) {
-                promise.set_exception(std::current_exception());
-            }
-        }});
+                try {
+                    promise.set_value(result.get());
+                } catch (...) {
+                    promise.set_exception(std::current_exception());
+                }
+            }});
     auto data = promise.get_future().get();
     sink((unsigned char *) data->data(), data->size());
 }
@@ -199,20 +199,20 @@ void BinaryCacheStore::addToStore(const ValidPathInfo & info, Source & narSource
             ThreadPool threadPool(25);
 
             auto doFile = [&](std::string member, std::string key, std::string target) {
-                checkInterrupt();
+                    checkInterrupt();
 
-                nlohmann::json json;
-                json["archive"] = target;
-                json["member"] = member;
+                    nlohmann::json json;
+                    json["archive"] = target;
+                    json["member"] = member;
 
-                // FIXME: or should we overwrite? The previous link may point
-                // to a GC'ed file, so overwriting might be useful...
-                if (fileExists(key)) return;
+                    // FIXME: or should we overwrite? The previous link may point
+                    // to a GC'ed file, so overwriting might be useful...
+                    if (fileExists(key)) return;
 
-                printMsg(lvlTalkative, "creating debuginfo link from '%s' to '%s'", key, target);
+                    printMsg(lvlTalkative, "creating debuginfo link from '%s' to '%s'", key, target);
 
-                upsertFile(key, json.dump(), "application/json");
-            };
+                    upsertFile(key, json.dump(), "application/json");
+                };
 
             std::regex regex1("^[0-9a-f]{2}$");
             std::regex regex2("^[0-9a-f]{38}\\.debug$");
@@ -278,9 +278,9 @@ void BinaryCacheStore::narFromPath(const StorePath & storePath, Sink & sink)
     uint64_t narSize = 0;
 
     LambdaSink wrapperSink([&](const unsigned char * data, size_t len) {
-        sink(data, len);
-        narSize += len;
-    });
+            sink(data, len);
+            narSize += len;
+        });
 
     auto decompressor = makeDecompressionSink(info->compression, wrapperSink);
 
@@ -312,21 +312,21 @@ void BinaryCacheStore::queryPathInfoUncached(const StorePath & storePath,
 
     getFile(narInfoFile,
         {[=](std::future<std::shared_ptr<std::string>> fut) {
-            try {
-                auto data = fut.get();
+                try {
+                    auto data = fut.get();
 
-                if (!data) return (*callbackPtr)(nullptr);
+                    if (!data) return (*callbackPtr)(nullptr);
 
-                stats.narInfoRead++;
+                    stats.narInfoRead++;
 
-                (*callbackPtr)((std::shared_ptr<ValidPathInfo>)
-                    std::make_shared<NarInfo>(*this, *data, narInfoFile));
+                    (*callbackPtr)((std::shared_ptr<ValidPathInfo>)
+                        std::make_shared<NarInfo>(*this, *data, narInfoFile));
 
-                (void) act; // force Activity into this lambda to ensure it stays alive
-            } catch (...) {
-                callbackPtr->rethrow();
-            }
-        }});
+                    (void) act; // force Activity into this lambda to ensure it stays alive
+                } catch (...) {
+                    callbackPtr->rethrow();
+                }
+            }});
 }
 
 StorePath BinaryCacheStore::addToStore(const string & name, const Path & srcPath,

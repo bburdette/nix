@@ -34,12 +34,12 @@ public:
     const T & operator () ()
     {
         std::call_once(done, [&]() {
-            try {
-                value = init();
-            } catch (...) {
-                ex = std::current_exception();
-            }
-        });
+                try {
+                    value = init();
+                } catch (...) {
+                    ex = std::current_exception();
+                }
+            });
         if (ex) std::rethrow_exception(ex);
         return value;
     }

@@ -67,9 +67,9 @@ static void prim_fetchTree(EvalState & state, const Pos & pos, Value * * args, V
 
         if (!attrs.count("type"))
             throw Error({
-                .hint = hintfmt("attribute 'type' is missing in call to 'fetchTree'"),
-                .nixCode = NixCode { .errPos = pos }
-            });
+                    .hint = hintfmt("attribute 'type' is missing in call to 'fetchTree'"),
+                    .nixCode = NixCode { .errPos = pos }
+                });
 
         input = fetchers::inputFromAttrs(attrs);
     } else
@@ -111,16 +111,16 @@ static void fetch(EvalState & state, const Pos & pos, Value * * args, Value & v,
                 name = state.forceStringNoCtx(*attr.value, *attr.pos);
             else
                 throw EvalError({
-                    .hint = hintfmt("unsupported argument '%s' to '%s'", attr.name, who),
-                    .nixCode = NixCode { .errPos = *attr.pos }
-                });
-            }
+                        .hint = hintfmt("unsupported argument '%s' to '%s'", attr.name, who),
+                        .nixCode = NixCode { .errPos = *attr.pos }
+                    });
+        }
 
         if (!url)
             throw EvalError({
-                .hint = hintfmt("'url' argument required"),
-                .nixCode = NixCode { .errPos = pos }
-            });
+                    .hint = hintfmt("'url' argument required"),
+                    .nixCode = NixCode { .errPos = pos }
+                });
     } else
         url = state.forceStringNoCtx(*args[0], pos);
 

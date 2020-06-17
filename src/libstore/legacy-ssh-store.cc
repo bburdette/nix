@@ -41,7 +41,7 @@ struct LegacySSHStore : public Store
         : Store(params)
         , host(host)
         , connections(make_ref<Pool<Connection>>(
-            std::max(1, (int) maxConnections),
+            std::max(1, (int)maxConnections),
             [this]() { return openConnection(); },
             [](const ref<Connection> & r) { return r->good; }
             ))
@@ -287,11 +287,11 @@ struct LegacySSHStore : public Store
 };
 
 static RegisterStoreImplementation regStore([](
-    const std::string & uri, const Store::Params & params)
+        const std::string & uri, const Store::Params & params)
     -> std::shared_ptr<Store>
-{
-    if (std::string(uri, 0, uriScheme.size()) != uriScheme) return 0;
-    return std::make_shared<LegacySSHStore>(std::string(uri, uriScheme.size()), params);
-});
+    {
+        if (std::string(uri, 0, uriScheme.size()) != uriScheme) return 0;
+        return std::make_shared<LegacySSHStore>(std::string(uri, uriScheme.size()), params);
+    });
 
 }
