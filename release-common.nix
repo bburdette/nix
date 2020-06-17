@@ -51,6 +51,9 @@ rec {
       boost
       nlohmann_json
 
+      # C++ formatting
+      uncrustify
+
       # Tests
       git
       mercurial
