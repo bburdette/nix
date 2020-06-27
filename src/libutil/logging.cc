@@ -4,6 +4,7 @@
 #include <atomic>
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <fstream>
 
 namespace nix {
 
@@ -69,13 +70,24 @@ public:
         writeToStderr(prefix + filterANSIEscapes(fs.s, !tty) + "\n");
     }
 
+    // void logEI(const ErrorInfo & ei) override
+    // {
+    //     std::stringstream oss;
+    //     oss << ei;
+
+    //     log(ei.level, oss.str());
+    // }
     void logEI(const ErrorInfo & ei) override
     {
         std::stringstream oss;
         oss << ei;
 
+        std::ofstream out("simplogg.txt", std::fstream::app | std::fstream::ate);
+        out << oss.str() << std::endl;
+
         log(ei.level, oss.str());
     }
+
 
     void startActivity(ActivityId act, Verbosity lvl, ActivityType type,
         const std::string & s, const Fields & fields, ActivityId parent)

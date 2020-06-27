@@ -5,6 +5,7 @@
 #include "shared.hh"
 #include "references.hh"
 #include "archive.hh"
+#include "globals.hh"
 
 using namespace nix;
 
@@ -142,6 +143,8 @@ static int compatNixHash(int argc, char * * argv)
             ss.push_back(*arg);
         return true;
     });
+
+    ErrorInfo::showTrace = settings.showTrace;
 
     if (op == opHash) {
         CmdHash cmd(flat ? FileIngestionMethod::Flat : FileIngestionMethod::Recursive);

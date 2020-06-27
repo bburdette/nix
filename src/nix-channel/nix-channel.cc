@@ -189,6 +189,8 @@ static int _main(int argc, char ** argv)
             return true;
         });
 
+        ErrorInfo::showTrace = settings.showTrace;
+
         initPlugins();
 
         switch (cmd) {

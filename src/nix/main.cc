@@ -174,6 +174,9 @@ void mainWrapped(int argc, char * * argv)
 
     args.parseCmdline(argvToStrings(argc, argv));
 
+    ErrorInfo::showTrace = settings.showTrace;
+    std::cout << "parseCmdline" << settings.showTrace << std::endl;
+
     initPlugins();
 
     if (!args.command) args.showHelpAndExit();

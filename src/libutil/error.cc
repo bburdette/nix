@@ -5,14 +5,23 @@
 #include "serialise.hh"
 #include <sstream>
 
+#include <fstream>
+
 namespace nix {
 
 
 const std::string nativeSystem = SYSTEM;
 
+
 BaseError & BaseError::addTrace(std::optional<ErrPos> e, hintformat hint)
 {
-    err.traces.push_front(Trace { .pos = e, .hint = hint});
+    try {
+        auto yese = *e;
+        err.traces.push_front(Trace { .pos = (yese ? e : std::nullopt), .hint = hint});
+    }
+    catch (std::bad_optional_access &e_) {
+        err.traces.push_front(Trace { .pos = e, .hint = hint});
+    }
     return *this;
 }
 
@@ -326,7 +335,9 @@ std::ostream& operator<<(std::ostream &out, const ErrorInfo &einfo)
     }
 
     // traces
+    std::cout << "ErrorInfo::showTrace" << ErrorInfo::showTrace << std::endl;
     if (ErrorInfo::showTrace) {
+        std::cout << "showtereasad" << einfo.traces.size() << std::endl;
         for (auto iter = einfo.traces.rbegin(); iter != einfo.traces.rend(); ++iter)
         {
             try {
@@ -362,10 +373,12 @@ std::ostream& operator<<(std::ostream &out, const ErrorInfo &einfo)
                 if (loc.has_value())
                     printCodeLines(out, prefix, pos, *loc);
             } catch(const std::bad_optional_access& e) {
+                std::cout << "baddoptionsals" << std::endl;
                 out << iter->hint.str() << std::endl;
             }
         }
     }
+
 
     return out;
 }

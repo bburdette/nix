@@ -303,7 +303,7 @@ int handleExceptions(const string & programName, std::function<void()> fun)
     ReceiveInterrupts receiveInterrupts; // FIXME: need better place for this
 
     ErrorInfo::programName = baseNameOf(programName);
-    ErrorInfo::showTrace = settings.showTrace;
+    std::cout << "handleExceptionz" << settings.showTrace << std::endl;
 
     string error = ANSI_RED "error:" ANSI_NORMAL " ";
     try {

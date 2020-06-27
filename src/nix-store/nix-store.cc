@@ -1097,6 +1097,8 @@ static int _main(int argc, char * * argv)
             return true;
         });
 
+        ErrorInfo::showTrace = settings.showTrace;
+
         initPlugins();
 
         if (!op) throw UsageError("no operation specified");

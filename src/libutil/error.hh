@@ -79,17 +79,33 @@ struct ErrPos {
     template <class P>
     ErrPos& operator=(const P &pos)
     {
-        origin = pos.origin;
-        line = pos.line;
-        column = pos.column;
-        file = pos.file;
+        if (pos) {
+            origin = pos.origin;
+            line = pos.line;
+            column = pos.column;
+            file = pos.file;
+        }
+        else
+        {
+            // restore defaults if pos is invalid.
+            origin = foFile;
+            line = 0;
+            column = 0;
+            file = "";
+        }
         return *this;
     }
 
     template <class P>
-    ErrPos(const P &p)
+    ErrPos(const P &pos)
     {
-        *this = p;
+        // leave defaults if pos is invalid.
+        if (pos) {
+            origin = pos.origin;
+            line = pos.line;
+            column = pos.column;
+            file = pos.file;
+        }
     }
 };
 
@@ -111,6 +127,16 @@ struct ErrorInfo {
 };
 
 std::ostream& operator<<(std::ostream &out, const ErrorInfo &einfo);
+
+// template<class P>
+// std::optional<ErrPos>& operator=(std::optional<ErrPos> &e, const P &pos) {
+//   if (pos)
+//     std::optional(ErrPos(pos));
+//   else
+//     std::nullopt;
+
+//   return e;
+// }
 
 /* BaseError should generally not be caught, as it has Interrupted as
    a subclass. Catch Error instead. */
@@ -173,6 +199,7 @@ public:
         return addTrace(e, hintfmt(fs, args...));
     }
 
+    // BaseError & addTrace(ErrPos e, hintformat hint);
     BaseError & addTrace(std::optional<ErrPos> e, hintformat hint);
 
     bool hasTrace() const { return !err.traces.empty(); }
