@@ -92,7 +92,6 @@ struct ErrPos {
     }
 };
 
-
 struct NixCode {
     ErrPos errPos;
     std::optional<string> prevLineOfCode;
