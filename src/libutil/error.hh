@@ -65,18 +65,33 @@ struct ErrPos {
     template <class P>
     ErrPos& operator=(const P &pos)
     {
-        line = pos.line;
-        column = pos.column;
-        file = pos.file;
+        if (pos) {
+            line = pos.line;
+            column = pos.column;
+            file = pos.file;
+        }
+        else
+        {
+            // restore defaults if pos is invalid.
+            line = 0;
+            column = 0;
+            file = "";
+        }
         return *this;
     }
 
     template <class P>
-    ErrPos(const P &p)
+    ErrPos(const P &pos)
     {
-        *this = p;
+        // leave defaults if pos is invalid.
+        if (pos) {
+            line = pos.line;
+            column = pos.column;
+            file = pos.file;
+        }
     }
 };
+
 
 struct NixCode {
     ErrPos errPos;
