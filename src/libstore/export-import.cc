@@ -40,7 +40,7 @@ void Store::exportPath(const StorePath & path, Sink & sink)
     Hash hash = hashSink.currentHash().first;
     if (hash != info->narHash && info->narHash != Hash(info->narHash.type))
         throw Error("hash of path '%s' has changed from '%s' to '%s'!",
-            printStorePath(path), info->narHash.to_string(Base32, true), hash.to_string(Base32, true));
+            printStorePath(path), info->narHash.to_string_clickable(Base32, true), hash.to_string_clickable(Base32, true));
 
     teeSink
         << exportMagic

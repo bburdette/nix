@@ -58,6 +58,8 @@ private:
        prefix. `isSRI` helps disambigate the various base-* encodings. */
     Hash(std::string_view s, HashType type, bool isSRI);
 
+    std::string printHash(Base base) const
+
 public:
     /* Check whether two hash are equal. */
     bool operator == (const Hash & h2) const;
@@ -91,6 +93,9 @@ public:
        (e.g. "sha256:"). */
     std::string to_string(Base base, bool includeType) const;
 
+    // same as to_string, but the hash is delimited form the prefix with a space.
+    std::string to_string_clickable(Base base) const;
+
     std::string gitRev() const
     {
         assert(type == htSHA1);
@@ -111,6 +116,9 @@ Hash newHashAllowEmpty(std::string hashStr, std::optional<HashType> ht);
 
 /* Print a hash in base-16 if it's MD5, or base-32 otherwise. */
 string printHash16or32(const Hash & hash);
+
+/* Print a base prefix with suffix as needed: '-' or ':' */
+string basePrefix(Base base);
 
 /* Compute the hash of the given string. */
 Hash hashString(HashType ht, std::string_view s);

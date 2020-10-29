@@ -143,7 +143,7 @@ std::pair<Tree, Input> Input::fetch(ref<Store> store) const
     if (auto prevNarHash = getNarHash()) {
         if (narHash != *prevNarHash)
             throw Error((unsigned int) 102, "NAR hash mismatch in input '%s' (%s), expected '%s', got '%s'",
-                to_string(), tree.actualPath, prevNarHash->to_string(SRI, true), narHash.to_string(SRI, true));
+                to_string(), tree.actualPath, prevNarHash->to_string_clickable(SRI, true), narHash.to_string_clickable(SRI, true));
     }
 
     if (auto prevLastModified = getLastModified()) {

@@ -113,14 +113,18 @@ string printHash16or32(const Hash & hash)
     return hash.to_string(hash.type == htMD5 ? Base16 : Base32, false);
 }
 
-
-std::string Hash::to_string(Base base, bool includeType) const
+string printBasePrefix(Base base) 
 {
-    std::string s;
-    if (base == SRI || includeType) {
-        s += printHashType(type);
+    std::string s = printHashType(type);
+    if (base == SRI ) {
         s += base == SRI ? '-' : ':';
     }
+    return s;
+}
+
+std::string Hash::printHash(Base base) const
+{
+    std::string s;
     switch (base) {
     case Base16:
         s += printHash16(*this);
@@ -134,6 +138,24 @@ std::string Hash::to_string(Base base, bool includeType) const
         break;
     }
     return s;
+}
+
+
+std::string Hash::to_string(Base base, bool includeType) const
+{
+    std::string s;
+    if (includeType) { 
+        s += basePrefix(base); 
+    }
+    s += show_base(base);
+}
+
+std::string Hash::to_string_clickable(Base base) const
+{
+    std::string s;
+    s += basePrefix(base); 
+    s += " ";
+    s += show_base(base);
 }
 
 Hash Hash::dummy(htSHA256);
